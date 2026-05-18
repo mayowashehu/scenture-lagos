@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Instagram, Facebook, Twitter, Mail, MapPin, Phone, ArrowRight } from 'lucide-react';
+import { Instagram, Facebook, Twitter, Mail, ArrowUpRight } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -26,12 +26,12 @@ export default function Footer() {
       links: [
         { to: '/about', label: 'About Us' },
         { to: '/contact', label: 'Contact' },
-        { to: '/blog', label: 'Our Journal' },
+        { to: '/blog', label: 'Journal' },
         { to: '/faq', label: 'FAQs' },
       ],
     },
     {
-      title: 'Support',
+      title: 'Legal',
       links: [
         { to: '/privacy-policy', label: 'Privacy Policy' },
         { to: '/terms-of-service', label: 'Terms of Service' },
@@ -42,66 +42,88 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-neutral-50">
-      {/* Newsletter Section */}
-      <div className="bg-white border-t border-b border-neutral-200/80">
-        <div className="container px-6 py-16">
-          <div className="max-w-xl mx-auto text-center">
-            <h3 className="font-heading text-2xl lg:text-3xl font-medium text-neutral-900">
-              Join The Scenture Circle
-            </h3>
-            <p className="mt-4 text-neutral-600 leading-relaxed">
-              Be the first to discover new arrivals, exclusive offers, and sensory stories from Lagos.
-            </p>
-            <form className="mt-8 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <div className="flex-1 relative">
-                <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
-                <input
-                  type="email"
-                  placeholder="Your email address"
-                  className="w-full pl-12 pr-4 py-3 bg-white border border-neutral-300 rounded-md text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:border-transparent transition-colors"
-                  aria-label="Email address for newsletter"
-                />
+    <footer className="bg-[#0D0D0D] text-[#FAF9F7]">
+
+      {/* Newsletter */}
+      <div className="border-b border-[#FAF9F7]/08">
+        <div className="max-w-[1440px] mx-auto px-8 lg:px-20 py-16 lg:py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-end">
+            <div>
+              <span className="text-[10px] tracking-[0.25em] uppercase text-[#C9A96E] font-medium">Stay in the circle</span>
+              <h3 className="font-['Cormorant_Garamond'] text-[clamp(28px,3.5vw,48px)] font-light text-[#FAF9F7] leading-tight mt-4">
+                The Scenture Letter —<br />
+                <em className="italic text-[#FAF9F7]/40 font-light">arrivals &amp; stories.</em>
+              </h3>
+            </div>
+            <div className="max-w-md">
+              <p className="text-sm text-[#FAF9F7]/40 leading-relaxed font-light mb-6">
+                First access to new releases, exclusive offers, and sensory stories from Lagos.
+              </p>
+              <div className="flex gap-0">
+                <div className="relative flex-1">
+                  <Mail size={14} strokeWidth={1.5} className="absolute left-0 top-1/2 -translate-y-1/2 text-[#FAF9F7]/30" />
+                  <input
+                    type="email"
+                    placeholder="your@email.com"
+                    className="w-full bg-transparent pl-6 pb-3 pt-1 text-[13px] text-[#FAF9F7] placeholder-[#FAF9F7]/25 border-b border-[#FAF9F7]/20 focus:outline-none focus:border-[#C9A96E] transition-colors"
+                    aria-label="Email for newsletter"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="group flex items-center gap-2 ml-8 text-[11px] tracking-[0.18em] uppercase font-medium text-[#C9A96E] hover:text-[#FAF9F7] transition-colors pb-3 border-b border-[#C9A96E]/40 hover:border-[#FAF9F7]/40 shrink-0"
+                >
+                  Subscribe
+                  <ArrowUpRight size={13} strokeWidth={1.5} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </button>
               </div>
-              <button type="submit" className="group flex items-center justify-center gap-2 px-6 py-3 bg-neutral-900 text-white rounded-md font-medium hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-800 transition-colors">
-                <span>Subscribe</span>
-                <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
-              </button>
-            </form>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Footer Content */}
-      <div className="container px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
-          {/* Brand Column */}
-          <div className="lg:col-span-2">
-            <Link to="/" className="font-heading text-2xl font-bold text-neutral-900">
-              Scenture Lagos<span className="text-neutral-400">.</span>
+      {/* Main content */}
+      <div className="max-w-[1440px] mx-auto px-8 lg:px-20 py-16 lg:py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.8fr_1fr_1fr_1fr] gap-12 lg:gap-8">
+
+          {/* Brand */}
+          <div>
+            <Link to="/" className="font-['Cormorant_Garamond'] text-[20px] font-light tracking-[0.1em] text-[#FAF9F7]">
+              SCENTURE <span className="italic text-[#C9A96E]">Lagos</span>
             </Link>
-            <p className="mt-4 text-neutral-600 text-sm leading-relaxed max-w-sm">
+            <p className="mt-5 text-[13px] text-[#FAF9F7]/35 leading-relaxed font-light max-w-[260px]">
               Crafting olfactory journeys from the heart of Lagos. Where luxury meets lifestyle, and every scent tells a story.
             </p>
-            <div className="mt-8 flex gap-3">
+            <div className="mt-8 flex gap-4">
               {socialLinks.map(({ icon: Icon, href, label }) => (
-                <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="p-2.5 bg-white border border-neutral-200 rounded-full text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 hover:border-neutral-300 transition-all">
-                  <Icon size={18} />
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="text-[#FAF9F7]/30 hover:text-[#C9A96E] transition-colors duration-200"
+                >
+                  <Icon size={16} strokeWidth={1.5} />
                 </a>
               ))}
             </div>
           </div>
-          
-          {/* Link Columns */}
-          {linkColumns.map((column) => (
-            <div key={column.title}>
-              <h4 className="font-semibold text-sm tracking-wider uppercase text-neutral-800">{column.title}</h4>
-              <ul className="mt-4 space-y-3">
-                {column.links.map((link) => (
+
+          {/* Links */}
+          {linkColumns.map((col) => (
+            <div key={col.title}>
+              <h4 className="text-[10px] tracking-[0.22em] uppercase text-[#FAF9F7]/35 font-medium mb-6">
+                {col.title}
+              </h4>
+              <ul className="space-y-3.5">
+                {col.links.map((link) => (
                   <li key={link.to}>
-                    <Link to={link.to} className="group flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors">
+                    <Link
+                      to={link.to}
+                      className="text-[13px] font-light text-[#FAF9F7]/55 hover:text-[#FAF9F7] transition-colors duration-200"
+                    >
                       {link.label}
-                      <ArrowRight size={12} className="opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1" />
                     </Link>
                   </li>
                 ))}
@@ -111,21 +133,17 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom Bar */}
-      <div className="border-t border-neutral-200/80">
-        <div className="container px-6 py-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-neutral-500 text-center sm:text-left">
-              © {currentYear} Scenture Lagos. All Rights Reserved.
-            </p>
-            <div className="flex items-center gap-4">
-              <p className="text-sm text-neutral-500">
-                Handcrafted with ❤️ in Lagos, Nigeria.
-              </p>
-              <Link to="/admin/login" className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
-                Admin Login
-              </Link>
-            </div>
+      {/* Bottom bar */}
+      <div className="border-t border-[#FAF9F7]/06">
+        <div className="max-w-[1440px] mx-auto px-8 lg:px-20 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-[11px] text-[#FAF9F7]/20 tracking-wide">
+            © {currentYear} Scenture Lagos. All Rights Reserved.
+          </p>
+          <div className="flex items-center gap-6">
+            <p className="text-[11px] text-[#FAF9F7]/20">Handcrafted in Lagos, Nigeria.</p>
+            <Link to="/admin/login" className="text-[11px] text-[#FAF9F7]/15 hover:text-[#FAF9F7]/40 transition-colors">
+              Admin
+            </Link>
           </div>
         </div>
       </div>

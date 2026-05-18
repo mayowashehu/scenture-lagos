@@ -1,25 +1,57 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Leaf, Gem, BrainCircuit } from 'lucide-react';
-import { Button } from '../components/ui/Button';
+import { ArrowUpRight, Gem, Leaf, BrainCircuit } from 'lucide-react';
 
-// --- Data ---
+// ── Design-system primitives ────────────────────────────────────────────────
+
+const Eyebrow = ({ children }) => (
+  <span className="text-[10px] tracking-[0.25em] uppercase text-[#C9A96E] font-medium">
+    {children}
+  </span>
+);
+
+const Rule = ({ className = '' }) => (
+  <div className={`w-12 h-px bg-[#C9A96E] ${className}`} />
+);
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.85, ease: [0.25, 0.46, 0.45, 0.94], delay },
+  }),
+};
+
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
+};
+
+// ── Data ────────────────────────────────────────────────────────────────────
+
 const valuesData = [
   {
     icon: Gem,
+    index: '01',
     title: 'Uncompromising Quality',
-    description: 'We source only the finest ingredients, ensuring each product meets our exacting standards of excellence and luxury.',
+    description:
+      'We source only the finest ingredients, ensuring each product meets our exacting standards of excellence and luxury.',
   },
   {
     icon: Leaf,
+    index: '02',
     title: 'Sustainable Craft',
-    description: "We're committed to environmentally conscious practices, from responsibly sourced materials to eco-friendly packaging.",
+    description:
+      "We're committed to environmentally conscious practices, from responsibly sourced materials to eco-friendly packaging.",
   },
   {
     icon: BrainCircuit,
+    index: '03',
     title: 'Scent Innovation',
-    description: 'We continuously explore new scent profiles and artisan techniques, pushing the boundaries of olfactory creation.',
+    description:
+      'We continuously explore new scent profiles and artisan techniques, pushing the boundaries of olfactory creation.',
   },
 ];
 
@@ -27,166 +59,291 @@ const teamData = [
   {
     name: 'Adebola Adeyemi',
     role: 'Founder & Creative Director',
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=761&q=80',
+    image:
+      'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=761&q=80',
   },
   {
     name: 'Chioma Okonkwo',
     role: 'Head Perfumer',
-    image: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
+    image:
+      'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=687&q=80',
   },
   {
     name: 'Oluwaseun Adeyemi',
     role: 'Operations Director',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
+    image:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=687&q=80',
   },
-   {
+  {
     name: 'Amara Nwosu',
     role: 'Marketing Director',
-    image: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
+    image:
+      'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=687&q=80',
   },
 ];
 
-// --- Reusable Components ---
-const Section = ({ children, className = '' }) => (
-  <section className={`py-16 lg:py-24 ${className}`}>
-    <div className="container mx-auto px-4">{children}</div>
-  </section>
-);
+// ── Sub-components ───────────────────────────────────────────────────────────
 
-const SectionHeader = React.memo(({ title, subtitle, pretitle }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, amount: 0.5 }}
-    transition={{ duration: 0.7, ease: "easeOut" }}
-    className="max-w-3xl mx-auto text-center mb-12 lg:mb-16"
-  >
-    {pretitle && <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-2">{pretitle}</p>}
-    <h2 className="text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">{title}</h2>
-    {subtitle && <p className="mt-4 text-lg text-slate-600">{subtitle}</p>}
-  </motion.div>
-));
-
-const ValueCard = React.memo(({ icon: Icon, title, description }) => (
+const ValueCard = React.memo(({ icon: Icon, index, title, description }) => (
   <motion.div
     variants={{
-        hidden: { opacity: 0, scale: 0.9 },
-        visible: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: "easeOut" }}
+      hidden: { opacity: 0, y: 28 },
+      visible: { opacity: 1, y: 0, transition: { duration: 0.75, ease: [0.25, 0.46, 0.45, 0.94] } },
     }}
-    className="bg-white p-8 rounded-2xl border border-slate-200/70 shadow-sm hover:shadow-lg hover:border-slate-300 transition-all duration-300"
+    className="group relative flex flex-col gap-6 p-8 lg:p-10 border border-[#0D0D0D]/08 hover:border-[#C9A96E]/35 transition-all duration-500 bg-[#FAF9F7]"
   >
-    <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-5">
-      <Icon className="text-primary" size={28} />
+    {/* Large index in background */}
+    <span className="absolute top-6 right-8 font-['Cormorant_Garamond'] text-6xl font-light text-[#0D0D0D]/04 select-none leading-none">
+      {index}
+    </span>
+
+    <div className="w-10 h-10 flex items-center justify-center border border-[#C9A96E]/40 text-[#C9A96E]">
+      <Icon size={18} strokeWidth={1.5} />
     </div>
-    <h3 className="text-xl font-bold text-slate-800 mb-2">{title}</h3>
-    <p className="text-slate-600 leading-relaxed">{description}</p>
+
+    <div>
+      <h3 className="font-['Cormorant_Garamond'] text-[22px] font-light text-[#0D0D0D] mb-3 leading-snug">
+        {title}
+      </h3>
+      <p className="text-[13px] text-[#0D0D0D]/55 leading-relaxed font-light">
+        {description}
+      </p>
+    </div>
   </motion.div>
 ));
 
-const TeamMemberCard = React.memo(({ name, role, image }) => (
-  <motion.div 
+const TeamCard = React.memo(({ name, role, image }) => (
+  <motion.div
     variants={{
-        hidden: { opacity: 0, y: 30 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" }}
+      hidden: { opacity: 0, y: 28 },
+      visible: { opacity: 1, y: 0, transition: { duration: 0.75, ease: [0.25, 0.46, 0.45, 0.94] } },
     }}
     className="group"
   >
-    <div className="relative overflow-hidden bg-slate-100 aspect-[4/5] rounded-2xl mb-4">
-      <img src={image} alt={name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+    <div className="aspect-[3/4] overflow-hidden bg-[#F0EDE8] mb-5">
+      <img
+        src={image}
+        alt={name}
+        className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-[1.04]"
+        loading="lazy"
+      />
     </div>
-    <h3 className="text-lg font-bold text-slate-800">{name}</h3>
-    <p className="text-primary font-medium">{role}</p>
+    <div className="pt-1 border-t border-[#0D0D0D]/08">
+      <p className="font-['Cormorant_Garamond'] text-[19px] font-light text-[#0D0D0D] mt-3 leading-snug">
+        {name}
+      </p>
+      <p className="text-[11px] tracking-[0.15em] uppercase text-[#C9A96E] mt-1">{role}</p>
+    </div>
   </motion.div>
 ));
 
+// ── Page ─────────────────────────────────────────────────────────────────────
 
-// --- Main Page Component ---
 const AboutPage = () => {
   return (
-    <div className="bg-white">
-      {/* Hero */}
-      <section className="relative py-24 sm:py-32 lg:py-40 bg-slate-50 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1599446794254-16ca8daa4c48?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80')] bg-cover bg-center opacity-10"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-slate-50/80 to-slate-50/20"></div>
-        <div className="container mx-auto px-4 relative">
-            <motion.div 
-                initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: "easeOut" }}
-                className="max-w-3xl text-center mx-auto"
+    <div className="bg-[#FAF9F7]">
+
+      {/* ── HERO ──────────────────────────────────────────────────────────── */}
+      <section className="relative min-h-[70vh] flex items-end overflow-hidden">
+        {/* Full-bleed image */}
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1599446794254-16ca8daa4c48?auto=format&fit=crop&w=1770&q=85"
+            alt="Scenture Lagos atelier"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D0D]/80 via-[#0D0D0D]/30 to-transparent" />
+        </div>
+
+        <div className="relative z-10 w-full max-w-[1440px] mx-auto px-8 lg:px-20 pb-20 lg:pb-28">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={stagger}
+            className="max-w-3xl"
+          >
+            <motion.div variants={fadeUp}><Eyebrow>Est. Lagos, 2018</Eyebrow></motion.div>
+            <motion.h1
+              variants={fadeUp}
+              custom={0.1}
+              className="font-['Cormorant_Garamond'] text-[clamp(44px,7vw,88px)] font-light text-[#FAF9F7] leading-[0.95] tracking-tight mt-5"
             >
-                <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 tracking-tight leading-tight">Crafting Memories, One Scent at a Time</h1>
-                <p className="mt-6 text-lg lg:text-xl text-slate-600">Scenture Lagos is a celebration of Nigerian heritage and contemporary luxury, born from a passion for the evocative power of fragrance.</p>
-            </motion.div>
+              Crafting memories,<br />
+              <em className="italic text-[#C9A96E] font-light">one scent at a time.</em>
+            </motion.h1>
+          </motion.div>
         </div>
       </section>
 
-      {/* Story Section */}
-      <Section>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.7, ease: "easeOut" }}
-            className="relative"
+      {/* ── STORY ─────────────────────────────────────────────────────────── */}
+      <section className="py-28 lg:py-36 px-8 lg:px-20">
+        <div className="max-w-[1440px] mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.15fr] gap-16 lg:gap-28 items-center">
+
+            {/* Image */}
+            <motion.div
+              initial={{ opacity: 0, x: -24 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="relative"
+            >
+              <div className="aspect-[4/5] overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1032&q=80"
+                  alt="Scenture Lagos founder"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {/* Accent corner ornament */}
+              <div className="absolute -bottom-5 -right-5 w-16 h-16 border border-[#C9A96E]/35" />
+              <div className="absolute -top-5 -left-5 w-16 h-16 border border-[#0D0D0D]/08" />
+            </motion.div>
+
+            {/* Text */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-80px' }}
+              variants={stagger}
+            >
+              <motion.div variants={fadeUp}><Eyebrow>Our Story</Eyebrow></motion.div>
+              <Rule className="my-6" />
+              <motion.h2
+                variants={fadeUp}
+                className="font-['Cormorant_Garamond'] text-[clamp(34px,4vw,54px)] font-light text-[#0D0D0D] leading-[1.05] tracking-tight"
+              >
+                A workshop in<br />
+                <em className="italic text-[#0D0D0D]/40 font-light">Victoria Island.</em><br />
+                A vision for the world.
+              </motion.h2>
+
+              <motion.div
+                variants={fadeUp}
+                className="mt-8 space-y-5 text-[14px] text-[#0D0D0D]/55 leading-relaxed font-light max-w-[460px]"
+              >
+                <p>
+                  Founded in 2018 by Adebola Adeyemi in a small workshop in Victoria Island, Scenture Lagos began as a personal quest to capture the essence of our vibrant culture through fragrance.
+                </p>
+                <p>
+                  This passion for scent storytelling and commitment to quality quickly resonated with those seeking to elevate their everyday spaces. Today, Scenture Lagos stands as a proud testament to Nigerian craftsmanship — offering curated scent experiences that blend local inspiration with global excellence.
+                </p>
+              </motion.div>
+
+              {/* Stats row */}
+              <motion.div
+                variants={fadeUp}
+                className="mt-10 pt-8 border-t border-[#0D0D0D]/08 grid grid-cols-3 gap-6"
+              >
+                {[['2018', 'Founded'], ['15+', 'Signature Scents'], ['2K+', 'Happy Clients']].map(
+                  ([num, label]) => (
+                    <div key={label}>
+                      <p className="font-['Cormorant_Garamond'] text-3xl font-light text-[#0D0D0D]">{num}</p>
+                      <p className="text-[10px] tracking-[0.15em] uppercase text-[#0D0D0D]/40 mt-0.5">{label}</p>
+                    </div>
+                  )
+                )}
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── VALUES ────────────────────────────────────────────────────────── */}
+      <section className="py-28 lg:py-36 px-8 lg:px-20 bg-[#F5F3EF]">
+        <div className="max-w-[1440px] mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={stagger}
           >
-            <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-lg">
-                <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1032&q=80" alt="Scenture Lagos Founder" className="w-full h-full object-cover"/>
-            </div>
-             <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-primary/10 rounded-2xl -z-10"></div>
-          </motion.div>
-          <motion.div 
-            initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.7, ease: "easeOut" }}
-            className="space-y-4"
-          >
-            <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-800 tracking-tight">Our Story</h2>
-            <p className="text-slate-600 leading-relaxed">Founded in 2018 by Adebola Adeyemi in a small workshop in Victoria Island, Scenture Lagos began as a personal quest to capture the essence of our vibrant culture through fragrance. This passion for scent storytelling and commitment to quality quickly resonated with those seeking to elevate their everyday spaces.</p>
-            <p className="text-slate-600 leading-relaxed">Today, Scenture Lagos is a proud testament to Nigerian craftsmanship, offering curated scent experiences that blend local inspiration with global excellence.</p>
+            <motion.div variants={fadeUp} className="mb-16">
+              <Eyebrow>Our Philosophy</Eyebrow>
+              <Rule className="my-6" />
+              <h2 className="font-['Cormorant_Garamond'] text-[clamp(34px,4vw,54px)] font-light text-[#0D0D0D] leading-tight max-w-xl">
+                The values that<br />
+                <em className="italic text-[#0D0D0D]/40">guide our craft.</em>
+              </h2>
+            </motion.div>
+
+            <motion.div
+              variants={stagger}
+              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            >
+              {valuesData.map((v) => (
+                <ValueCard key={v.title} {...v} />
+              ))}
+            </motion.div>
           </motion.div>
         </div>
-      </Section>
-      
-      {/* Values Section */}
-      <Section className="bg-slate-50">
-        <SectionHeader pretitle="Our Philosophy" title="The Values That Guide Us" subtitle="Our principles are the heart of our craft, ensuring every product is a true reflection of our commitment to excellence." />
-        <motion.div 
-            initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }}
-            transition={{ staggerChildren: 0.15 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
-        >
-          {valuesData.map(value => <ValueCard key={value.title} {...value} />)}
-        </motion.div>
-      </Section>
-      
-      {/* Team Section */}
-      <Section>
-        <SectionHeader pretitle="Our Artisans" title="The Faces Behind the Fragrance" subtitle="Meet the passionate team dedicated to bringing the Scenture Lagos vision to life." />
-         <motion.div 
-            initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }}
-            transition={{ staggerChildren: 0.15 }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
-        >
-          {teamData.map(member => <TeamMemberCard key={member.name} {...member} />)}
-        </motion.div>
-      </Section>
+      </section>
 
-      {/* CTA Section */}
-      <Section className="bg-slate-900">
-        <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.8 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="max-w-3xl mx-auto text-center"
-        >
-          <h2 className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight">Experience the Scenture Difference</h2>
-          <p className="mt-4 text-slate-300 leading-relaxed">Transform your space into a sanctuary of luxury and distinction. Discover a fragrance that tells your story.</p>
-          <Button asChild size="lg" className="mt-8 group">
-            <Link to="/shop" className="flex justify-center items-center">
-              Shop The Collection
-              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </Button>
-        </motion.div>
-      </Section>
+      {/* ── TEAM ──────────────────────────────────────────────────────────── */}
+      <section className="py-28 lg:py-36 px-8 lg:px-20">
+        <div className="max-w-[1440px] mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+            variants={stagger}
+          >
+            <motion.div variants={fadeUp} className="mb-16">
+              <Eyebrow>Our Artisans</Eyebrow>
+              <Rule className="my-6" />
+              <h2 className="font-['Cormorant_Garamond'] text-[clamp(34px,4vw,54px)] font-light text-[#0D0D0D] leading-tight">
+                The faces behind<br />
+                <em className="italic text-[#0D0D0D]/40">the fragrance.</em>
+              </h2>
+            </motion.div>
+
+            <motion.div
+              variants={stagger}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10"
+            >
+              {teamData.map((m) => (
+                <TeamCard key={m.name} {...m} />
+              ))}
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── CTA ───────────────────────────────────────────────────────────── */}
+      <section className="py-28 lg:py-36 px-8 lg:px-20 bg-[#0D0D0D]">
+        <div className="max-w-[1440px] mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.4 }}
+            variants={stagger}
+            className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 items-end"
+          >
+            <motion.div variants={fadeUp}>
+              <Eyebrow>Begin Your Journey</Eyebrow>
+              <Rule className="my-6 bg-[#C9A96E]/40" />
+              <h2 className="font-['Cormorant_Garamond'] text-[clamp(36px,5vw,64px)] font-light text-[#FAF9F7] leading-[1.0] tracking-tight">
+                Experience the<br />
+                <em className="italic text-[#C9A96E]">Scenture difference.</em>
+              </h2>
+              <p className="mt-6 text-[14px] text-[#FAF9F7]/40 font-light leading-relaxed max-w-md">
+                Transform your space into a sanctuary of luxury and distinction. Discover a fragrance that tells your story.
+              </p>
+            </motion.div>
+
+            <motion.div variants={fadeUp}>
+              <Link
+                to="/shop"
+                className="group inline-flex items-center gap-2.5 bg-[#C9A96E] text-[#0D0D0D] px-10 py-5 text-[11px] tracking-[0.2em] uppercase font-medium hover:bg-[#FAF9F7] transition-all duration-300"
+              >
+                Shop the Collection
+                <ArrowUpRight size={14} strokeWidth={1.5} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
     </div>
   );
 };

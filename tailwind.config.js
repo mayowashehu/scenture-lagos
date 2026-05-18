@@ -6,29 +6,59 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // ── Scenture Design System ──────────────────────────────────
+        ink:        '#0D0D0D',          // near-black — primary text, buttons
+        canvas:     '#FAF9F7',          // warm off-white — page background
+        gold:       '#C9A96E',          // aged gold — single accent
+        'gold-dim': '#A8885A',          // deeper gold for hover states
+        'ink-50':   'rgba(13,13,13,0.05)',
+        'ink-muted':'rgba(13,13,13,0.45)',
+
+        // ── Legacy tokens (kept for backward compat) ────────────────
         primary: {
-          DEFAULT: '#E5D3C8', // Nude primary color
-          dark: '#C4B0A2',
-          light: '#F2E9E4',
+          DEFAULT: '#C9A96E',
+          dark:    '#A8885A',
+          light:   '#E2CAA0',
         },
         secondary: {
-          DEFAULT: '#2D2D2D', // Deep charcoal
-          light: '#4A4A4A',
+          DEFAULT: '#0D0D0D',
+          light:   '#2A2A2A',
         },
         accent: {
-          DEFAULT: '#D4AF37', // Muted gold
-          light: '#E6C76E',
+          DEFAULT: '#C9A96E',
+          light:   '#E2CAA0',
         },
-        cream: '#F5F5F0',
-        background: '#FAF7F2',
+        cream:      '#FAF9F7',
+        background: '#FAF9F7',
         muted: {
-          DEFAULT: 'hsl(210, 40%, 96.1%)', // Light gray for bg-muted
-          foreground: 'hsl(215, 20%, 65%)', // Complementary muted foreground
+          DEFAULT:    'rgba(13,13,13,0.06)',
+          foreground: 'rgba(13,13,13,0.40)',
         },
       },
+
       fontFamily: {
-        heading: ['Playfair Display', 'serif'],
-        body: ['Montserrat', 'sans-serif'],
+        heading:  ['"Cormorant Garamond"', 'Georgia', 'serif'],
+        display:  ['"Cormorant Garamond"', 'Georgia', 'serif'],
+        body:     ['"DM Sans"', 'system-ui', 'sans-serif'],
+        sans:     ['"DM Sans"', 'system-ui', 'sans-serif'],
+      },
+
+      fontSize: {
+        '2xs': ['10px', { letterSpacing: '0.12em' }],
+      },
+
+      letterSpacing: {
+        widest:  '0.25em',
+        wider:   '0.18em',
+        label:   '0.20em',
+      },
+
+      transitionTimingFunction: {
+        'luxury': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+      },
+
+      transitionDuration: {
+        '400': '400ms',
       },
     },
   },

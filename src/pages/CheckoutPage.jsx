@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CreditCard, Check } from 'lucide-react'; // _RESPONSIVE-UPDATE_: Removed unused icons
-import { Button } from '../components/ui/Button';
+import { Check, ChevronDown, AlertTriangle } from 'lucide-react';
 import { formatPrice } from '../lib/utils';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -10,180 +9,300 @@ import { useToast } from '../components/ui/Toast';
 import OrderService from '../services/order.service';
 import { NIGERIAN_STATES } from '../lib/locations';
 
-// --- Reusable Child Components for a Cleaner Structure ---
+// ── Design-system primitives ────────────────────────────────────────────────
 
-const LoadingSpinner = ({ text }) => (
-  <div className="min-h-[70vh] flex flex-col items-center justify-center text-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
-    {text && <p className="text-secondary/80 font-medium">{text}</p>}
-  </div>
+const Eyebrow = ({ children }) => (
+  <span className="text-[10px] tracking-[0.25em] uppercase text-[#C9A96E] font-medium">{children}</span>
 );
 
-const CheckoutProgress = ({ step, setStep }) => {
-  const steps = ['Shipping', 'Payment', 'Complete'];
-  const isStepDone = (s) => steps.indexOf(s) < steps.indexOf(step);
-  const isStepCurrent = (s) => s === step;
+const Rule = ({ className = '' }) => (
+  <div className={`w-10 h-px bg-[#C9A96E] ${className}`} />
+);
 
+// Bare underline input — consistent with the rest of the system
+const Field = React.memo(({ id, name, type = 'text', label, value, onChange, required = true, as = 'input', children }) => {
+  const base =
+    'w-full bg-transparent border-b border-[#0D0D0D]/15 py-3 text-[14px] text-[#0D0D0D] placeholder-[#0D0D0D]/25 font-light focus:outline-none focus:border-[#C9A96E] transition-colors duration-300';
   return (
-    <div className="mb-8 md:mb-12">
-      <div className="flex items-start justify-center max-w-lg mx-auto"> {/* _RESPONSIVE-UPDATE_: Changed to items-start for better alignment with text */}
-        {steps.map((s, index) => (
+    <div className="flex flex-col gap-2">
+      <label htmlFor={id} className="text-[10px] tracking-[0.2em] uppercase text-[#0D0D0D]/40">
+        {label}
+      </label>
+      {as === 'select' ? (
+        <div className="relative">
+          <select id={id} name={name} value={value} onChange={onChange} required={required} className={`${base} appearance-none pr-6 cursor-pointer`}>
+            {children}
+          </select>
+          <ChevronDown size={12} className="absolute right-0 top-1/2 -translate-y-1/2 text-[#0D0D0D]/35 pointer-events-none" />
+        </div>
+      ) : (
+        <input id={id} name={name} type={type} value={value} onChange={onChange} required={required} className={base} />
+      )}
+    </div>
+  );
+});
+
+// ── Progress indicator ────────────────────────────────────────────────────────
+
+const STEPS = ['Shipping', 'Payment', 'Complete'];
+
+const CheckoutProgress = ({ step }) => {
+  const current = STEPS.indexOf(step);
+  return (
+    <div className="flex items-center gap-0 mb-12 lg:mb-16">
+      {STEPS.map((s, i) => {
+        const done    = i < current;
+        const active  = i === current;
+        return (
           <React.Fragment key={s}>
-            <div
-              className="flex flex-col items-center cursor-pointer text-center" // _RESPONSIVE-UPDATE_: Added text-center
-              onClick={() => (isStepDone(s) && s !== 'Complete' ? setStep(s) : null)}
-            >
-              <div
-                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all ${ // _RESPONSIVE-UPDATE_: Smaller circles on mobile
-                  isStepDone(s) || isStepCurrent(s) ? 'bg-primary border-primary text-white' : 'border-gray-300 text-gray-400'
-                }`}
-              >
-                {isStepDone(s) ? <Check size={16} /> : <span className="text-sm sm:text-base">{index + 1}</span>} {/* _RESPONSIVE-UPDATE_: Responsive text size */}
+            <div className="flex items-center gap-3">
+              <div className={`w-7 h-7 flex items-center justify-center border transition-all duration-300 ${
+                done   ? 'bg-[#C9A96E] border-[#C9A96E]' :
+                active ? 'bg-[#0D0D0D] border-[#0D0D0D]' :
+                         'bg-transparent border-[#0D0D0D]/20'
+              }`}>
+                {done ? (
+                  <Check size={12} strokeWidth={2} className="text-[#0D0D0D]" />
+                ) : (
+                  <span className={`text-[11px] font-medium ${active ? 'text-[#FAF9F7]' : 'text-[#0D0D0D]/30'}`}>{i + 1}</span>
+                )}
               </div>
-              <span className={`mt-2 text-xs font-medium w-20 sm:w-auto ${isStepDone(s) || isStepCurrent(s) ? 'text-primary' : 'text-gray-400'}`}> {/* _RESPONSIVE-UPDATE_: Adjusted text size and added fixed width on mobile to prevent layout shifts */}
-                {s}
-              </span>
+              <span className={`text-[11px] tracking-[0.15em] uppercase font-medium transition-colors ${
+                active ? 'text-[#0D0D0D]' : done ? 'text-[#C9A96E]' : 'text-[#0D0D0D]/25'
+              }`}>{s}</span>
             </div>
-            {index < steps.length - 1 && (
-              <div className={`flex-1 h-px mx-1 sm:mx-4 mt-4 sm:mt-5 transition-all ${isStepDone(s) ? 'bg-primary' : 'bg-gray-300'}`} /> // _RESPONSIVE-UPDATE_: Reduced margin, adjusted top margin to align with circles
+            {i < STEPS.length - 1 && (
+              <div className={`flex-1 h-px mx-6 transition-all duration-500 ${done ? 'bg-[#C9A96E]' : 'bg-[#0D0D0D]/10'}`} />
             )}
           </React.Fragment>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 };
 
-// --- Main Checkout Page Component ---
+// ── Spinner / full-page loader ────────────────────────────────────────────────
+
+const PageLoader = ({ text }) => (
+  <div className="min-h-[70vh] flex flex-col items-center justify-center gap-5 bg-[#FAF9F7]">
+    <div className="w-8 h-8 border border-[#C9A96E]/40 border-t-[#C9A96E] rounded-full animate-spin" />
+    {text && <p className="text-[11px] tracking-[0.2em] uppercase text-[#0D0D0D]/35">{text}</p>}
+  </div>
+);
+
+// ── Shipping method card ──────────────────────────────────────────────────────
+
+const ShippingCard = ({ method, selected, onSelect, subtotal }) => {
+  const isFree = method.freeShippingThreshold && subtotal >= method.freeShippingThreshold;
+  return (
+    <label
+      htmlFor={method.id}
+      className={`flex items-center gap-4 px-5 py-4 border cursor-pointer transition-all duration-250 ${
+        selected
+          ? 'border-[#0D0D0D] bg-[#0D0D0D]/02'
+          : 'border-[#0D0D0D]/12 hover:border-[#0D0D0D]/30'
+      }`}
+    >
+      {/* Custom radio */}
+      <div className={`w-4 h-4 border-2 flex items-center justify-center shrink-0 transition-all ${selected ? 'border-[#0D0D0D]' : 'border-[#0D0D0D]/25'}`}>
+        {selected && <div className="w-2 h-2 bg-[#0D0D0D]" />}
+      </div>
+      <input type="radio" id={method.id} name="shippingMethod" value={method.id} checked={selected} onChange={() => onSelect(method.id)} className="sr-only" />
+      <div className="flex-grow min-w-0">
+        <p className="text-[13px] font-medium text-[#0D0D0D]">{method.name}</p>
+        {method.description && <p className="text-[12px] text-[#0D0D0D]/40 font-light mt-0.5">{method.description}</p>}
+      </div>
+      <p className="text-[13px] font-medium text-[#0D0D0D] shrink-0">
+        {isFree ? <span className="text-emerald-600 text-[11px] tracking-[0.1em] uppercase">Free</span> : formatPrice(method.price)}
+      </p>
+    </label>
+  );
+};
+
+// ── Payment method card ───────────────────────────────────────────────────────
+
+const PaymentCard = ({ method, selected, onSelect }) => (
+  <label
+    htmlFor={method.name}
+    className={`flex items-center gap-4 px-5 py-4 border cursor-pointer transition-all duration-250 ${
+      selected
+        ? 'border-[#0D0D0D] bg-[#0D0D0D]/02'
+        : 'border-[#0D0D0D]/12 hover:border-[#0D0D0D]/30'
+    }`}
+  >
+    <div className={`w-4 h-4 border-2 flex items-center justify-center shrink-0 transition-all ${selected ? 'border-[#0D0D0D]' : 'border-[#0D0D0D]/25'}`}>
+      {selected && <div className="w-2 h-2 bg-[#0D0D0D]" />}
+    </div>
+    <input type="radio" id={method.name} name="paymentMethod" value={method.name} checked={selected} onChange={() => onSelect(method.name)} className="sr-only" />
+    <div className="flex-grow min-w-0">
+      <p className="text-[13px] font-medium text-[#0D0D0D]">{method.displayName}</p>
+      {method.description && <p className="text-[12px] text-[#0D0D0D]/40 font-light mt-0.5">{method.description}</p>}
+    </div>
+  </label>
+);
+
+// ── Order summary sidebar ─────────────────────────────────────────────────────
+
+const OrderSummary = ({ cart, shippingFee, taxAmount, totalAmount, selectedShippingMethod }) => (
+  <div className="border border-[#0D0D0D]/08 lg:sticky lg:top-[88px]">
+    <div className="px-6 py-5 border-b border-[#0D0D0D]/08">
+      <Eyebrow>Order Summary</Eyebrow>
+    </div>
+
+    {/* Items */}
+    {cart?.items && (
+      <div className="px-6 py-5 space-y-4 border-b border-[#0D0D0D]/08">
+        {cart.items.map((item) => (
+          <div key={item._id} className="flex items-center gap-3">
+            <div className="w-12 h-14 bg-[#F0EDE8] overflow-hidden shrink-0">
+              <img src={item.productImage} alt={item.productName} className="w-full h-full object-cover" loading="lazy" />
+            </div>
+            <div className="flex-grow min-w-0">
+              <p className="text-[13px] text-[#0D0D0D] font-light leading-snug truncate">{item.productName}</p>
+              <p className="text-[11px] text-[#0D0D0D]/35 mt-0.5">Qty {item.quantity}</p>
+            </div>
+            <p className="text-[13px] font-medium text-[#0D0D0D] shrink-0">{formatPrice(item.total)}</p>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {/* Totals */}
+    <div className="px-6 py-5 space-y-3">
+      <div className="flex justify-between text-[13px]">
+        <span className="text-[#0D0D0D]/45 font-light">Subtotal</span>
+        <span className="font-medium text-[#0D0D0D]">{formatPrice(cart?.subtotal)}</span>
+      </div>
+      <div className="flex justify-between text-[13px]">
+        <span className="text-[#0D0D0D]/45 font-light">Shipping</span>
+        <span className="font-medium text-[#0D0D0D]">{selectedShippingMethod ? formatPrice(shippingFee) : <span className="italic text-[#0D0D0D]/30 font-light text-[12px]">TBD</span>}</span>
+      </div>
+      <div className="flex justify-between text-[13px]">
+        <span className="text-[#0D0D0D]/45 font-light">Tax (5%)</span>
+        <span className="font-medium text-[#0D0D0D]">{formatPrice(taxAmount)}</span>
+      </div>
+    </div>
+
+    <div className="px-6 py-5 border-t border-[#0D0D0D]/08 flex justify-between items-baseline">
+      <span className="text-[11px] tracking-[0.12em] uppercase font-medium text-[#0D0D0D]">Total</span>
+      <span className="font-['Cormorant_Garamond'] text-[28px] font-light text-[#0D0D0D]">{formatPrice(totalAmount)}</span>
+    </div>
+  </div>
+);
+
+// ── Section divider ───────────────────────────────────────────────────────────
+
+const SectionTitle = ({ children }) => (
+  <div className="mb-6">
+    <Eyebrow>{children}</Eyebrow>
+    <Rule className="mt-3" />
+  </div>
+);
+
+// ── Main page ─────────────────────────────────────────────────────────────────
 
 const CheckoutPage = () => {
   const { cart, loading: isCartLoading, clearCart } = useCart();
-  const { currentUser } = useAuth(); // _RESPONSIVE-UPDATE_: Removed unused variable
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { currentUser } = useAuth();
+  const navigate  = useNavigate();
+  const location  = useLocation();
   const { addToast } = useToast();
 
-  const [formStep, setFormStep] = useState('Shipping'); // 'Shipping', 'Payment', 'Confirmation', 'Verifying'
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [order, setOrder] = useState(null);
+  const [formStep, setFormStep]                     = useState('Shipping');
+  const [isProcessing, setIsProcessing]             = useState(false);
+  const [order, setOrder]                           = useState(null);
 
   const [shippingInfo, setShippingInfo] = useState({
     firstName: '', lastName: '', email: '', phone: '',
     address: '', city: '', state: 'Lagos', postalCode: '', country: 'Nigeria',
   });
 
-  const [shippingMethods, setShippingMethods] = useState([]);
+  const [shippingMethods, setShippingMethods]               = useState([]);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
-  const [isLoadingShipping, setIsLoadingShipping] = useState(false);
+  const [isLoadingShipping, setIsLoadingShipping]           = useState(false);
+  const [paymentMethods, setPaymentMethods]                 = useState([]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod]   = useState('');
 
-  const [paymentMethods, setPaymentMethods] = useState([]);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
-
-  // Pre-fill form if user is logged in
+  // Pre-fill from auth
   useEffect(() => {
     if (currentUser) {
-      setShippingInfo(prev => ({
-        ...prev,
+      setShippingInfo((p) => ({
+        ...p,
         firstName: currentUser.firstName || currentUser.name?.split(' ')[0] || '',
-        lastName: currentUser.lastName || currentUser.name?.split(' ').slice(1).join(' ') || '',
-        email: currentUser.email || '',
-        phone: currentUser.phone || '',
+        lastName:  currentUser.lastName  || currentUser.name?.split(' ').slice(1).join(' ') || '',
+        email:     currentUser.email || '',
+        phone:     currentUser.phone || '',
       }));
     }
   }, [currentUser]);
-  
-  // Handle payment verification on redirect from Paystack
+
+  // Handle Paystack redirect
   useEffect(() => {
-    const query = new URLSearchParams(location.search);
-    const reference = query.get('reference');
-    if (reference) {
-      setFormStep('Verifying');
-      verifyPayment(reference);
+    const ref = new URLSearchParams(location.search).get('reference');
+    if (ref) { setFormStep('Verifying'); verifyPayment(ref); }
+  }, [location.search]);
+
+  // Redirect if cart empty
+  useEffect(() => {
+    const isVerifying = new URLSearchParams(location.search).has('reference');
+    const isFinal = formStep === 'Complete' || formStep === 'Verifying';
+    if (!isFinal && !isVerifying && !isCartLoading && (!cart || cart.items.length === 0)) {
+      addToast('Your cart is empty.', 'warning');
+      navigate('/cart');
     }
-  }, [location.search]); // _RESPONSIVE-UPDATE_: More specific dependency
+  }, [isCartLoading, cart, navigate, addToast, formStep, location.search]);
 
-  // Redirect if cart is empty, but NOT if we are confirming or verifying an order
+  // Fetch payment methods
   useEffect(() => {
-    const query = new URLSearchParams(location.search);
-    const isVerifyingPayment = query.has('reference');
-    const isFinalStep = formStep === 'Confirmation' || formStep === 'Verifying';
+    OrderService.getPaymentMethods()
+      .then((methods) => {
+        setPaymentMethods(methods);
+        if (methods.length) setSelectedPaymentMethod(methods[0].name);
+      })
+      .catch((err) => addToast(err.message || 'Failed to fetch payment options.', 'error'));
+  }, [addToast]);
 
-    if (!isFinalStep && !isVerifyingPayment && !isCartLoading && (!cart || cart.items.length === 0)) {
-        addToast('Your cart is empty. Please add items before checkout.', 'warning');
-        navigate('/cart');
-    }
-  }, [isCartLoading, cart, navigate, addToast, formStep, location.search]); // _RESPONSIVE-UPDATE_: More specific dependency
-
-  // Fetch shipping and payment methods
+  // Fetch shipping rates on state change
   useEffect(() => {
-    const fetchData = async () => {
-        try {
-            const methods = await OrderService.getPaymentMethods();
-            setPaymentMethods(methods);
-            if (methods.length > 0) {
-                setSelectedPaymentMethod(methods[0].name);
-            }
-        } catch (error) {
-            addToast(error.message || 'Failed to fetch payment options.', 'error');
-        }
-    };
-    fetchData();
-  }, [addToast]); // _RESPONSIVE-UPDATE_: Added dependency
-  
-  useEffect(() => {
-    const fetchShippingMethods = async (state) => {
-        if (!state) return;
-        setIsLoadingShipping(true);
-        setSelectedShippingMethod(null);
-        try {
-            const methods = await OrderService.getShippingRates(state);
-            setShippingMethods(methods);
-            if (methods.length === 0) {
-                addToast('No shipping methods available for your location.', 'warning');
-            }
-        } catch (error) {
-            addToast(error.message || 'Failed to fetch shipping methods.', 'error');
-            setShippingMethods([]);
-        } finally {
-            setIsLoadingShipping(false);
-        }
-    };
-    fetchShippingMethods(shippingInfo.state);
-  }, [shippingInfo.state, addToast]); // _RESPONSIVE-UPDATE_: Added dependency
+    if (!shippingInfo.state) return;
+    setIsLoadingShipping(true);
+    setSelectedShippingMethod(null);
+    OrderService.getShippingRates(shippingInfo.state)
+      .then((methods) => {
+        setShippingMethods(methods);
+        if (!methods.length) addToast('No shipping methods for your state.', 'warning');
+      })
+      .catch((err) => { addToast(err.message || 'Failed to fetch shipping.', 'error'); setShippingMethods([]); })
+      .finally(() => setIsLoadingShipping(false));
+  }, [shippingInfo.state, addToast]);
 
-
-  const handleInputChange = (e) => {
+  const handleInput = (e) => {
     const { name, value } = e.target;
-    setShippingInfo((prev) => ({ ...prev, [name]: value }));
+    setShippingInfo((p) => ({ ...p, [name]: value }));
   };
 
-  const selectedRate = useMemo(() => {
-    if (!selectedShippingMethod) return null;
-    return shippingMethods.find(m => m.id === selectedShippingMethod);
-  }, [selectedShippingMethod, shippingMethods]);
+  const selectedRate = useMemo(
+    () => shippingMethods.find((m) => m.id === selectedShippingMethod) || null,
+    [selectedShippingMethod, shippingMethods]
+  );
 
   const shippingFee = useMemo(() => {
     if (!selectedRate || !cart) return 0;
-    const isEligibleForFree = selectedRate.freeShippingThreshold && cart.subtotal >= selectedRate.freeShippingThreshold;
-    return isEligibleForFree ? 0 : selectedRate.price;
+    const free = selectedRate.freeShippingThreshold && cart.subtotal >= selectedRate.freeShippingThreshold;
+    return free ? 0 : selectedRate.price;
   }, [selectedRate, cart]);
 
-  const taxRate = 5;
-  const taxAmount = useMemo(() => (cart?.subtotal * taxRate) / 100, [cart?.subtotal, taxRate]); // _RESPONSIVE-UPDATE_: Optional chaining for safety
-  const totalAmount = useMemo(() => cart?.subtotal + shippingFee + taxAmount, [cart?.subtotal, shippingFee, taxAmount]); // _RESPONSIVE-UPDATE_: Optional chaining for safety
+  const taxAmount   = useMemo(() => ((cart?.subtotal || 0) * 5) / 100, [cart?.subtotal]);
+  const totalAmount = useMemo(() => (cart?.subtotal || 0) + shippingFee + taxAmount, [cart?.subtotal, shippingFee, taxAmount]);
 
-  const handleFormSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (formStep === 'Shipping') {
-        if (!selectedShippingMethod) {
-            return addToast('Please select a shipping method.', 'error');
-        }
-        setFormStep('Payment');
+      if (!selectedShippingMethod) return addToast('Please select a shipping method.', 'error');
+      setFormStep('Payment');
     } else if (formStep === 'Payment') {
-        if (!selectedPaymentMethod) {
-            return addToast('Please select a payment method.', 'error');
-        }
-        await createOrderAndPay();
+      if (!selectedPaymentMethod) return addToast('Please select a payment method.', 'error');
+      await createOrderAndPay();
     }
   };
 
@@ -191,42 +310,24 @@ const CheckoutPage = () => {
     setIsProcessing(true);
     try {
       const orderData = {
-        items: cart.items.map((item) => ({
-          product: item.product,
-          quantity: item.quantity,
-          variant: item.variant?._id || null,
-        })),
-        shippingAddress: {
-          firstName: shippingInfo.firstName,
-          lastName: shippingInfo.lastName,
-          email: shippingInfo.email,
-          phone: shippingInfo.phone,
-          street: shippingInfo.address,
-          city: shippingInfo.city,
-          state: shippingInfo.state,
-          postalCode: shippingInfo.postalCode,
-          country: shippingInfo.country,
-        },
+        items: cart.items.map((item) => ({ product: item.product, quantity: item.quantity, variant: item.variant?._id || null })),
+        shippingAddress: { firstName: shippingInfo.firstName, lastName: shippingInfo.lastName, email: shippingInfo.email, phone: shippingInfo.phone, street: shippingInfo.address, city: shippingInfo.city, state: shippingInfo.state, postalCode: shippingInfo.postalCode, country: shippingInfo.country },
         paymentMethod: selectedPaymentMethod,
         shippingRateId: selectedShippingMethod,
       };
-
-      const { order: createdOrder } = await OrderService.createOrder(orderData);
-      
-      if (!createdOrder) throw new Error('Failed to create order. Please try again.');
-      
-      setOrder(createdOrder);
-
+      const { order: created } = await OrderService.createOrder(orderData);
+      if (!created) throw new Error('Failed to create order. Please try again.');
+      setOrder(created);
       if (selectedPaymentMethod === 'paystack') {
-        const paymentResponse = await OrderService.initializePayment(createdOrder._id);
-        window.location.href = paymentResponse.authorization_url;
+        const pay = await OrderService.initializePayment(created._id);
+        window.location.href = pay.authorization_url;
       } else {
-        setFormStep('Confirmation');
         clearCart();
+        setFormStep('Complete');
         addToast('Order placed successfully!', 'success');
       }
-    } catch (error) {
-      addToast(error.message || 'An error occurred while placing your order.', 'error');
+    } catch (err) {
+      addToast(err.message || 'An error occurred while placing your order.', 'error');
     } finally {
       setIsProcessing(false);
     }
@@ -234,225 +335,262 @@ const CheckoutPage = () => {
 
   const verifyPayment = async (reference) => {
     try {
-      const { order: verifiedOrder } = await OrderService.verifyPayment(reference);
-      if (!verifiedOrder) throw new Error('Invalid payment verification response.');
-      
-      setOrder(verifiedOrder);
+      const { order: verified } = await OrderService.verifyPayment(reference);
+      if (!verified) throw new Error('Invalid payment verification.');
+      setOrder(verified);
       clearCart();
-      setFormStep('Confirmation');
-      addToast('Payment successful! Your order has been confirmed.', 'success');
+      setFormStep('Complete');
+      addToast('Payment confirmed!', 'success');
       navigate(location.pathname, { replace: true });
-
-    } catch (error) {
-      addToast(error.message || 'Payment failed. Please try again or use a different method.', 'error');
+    } catch (err) {
+      addToast(err.message || 'Payment verification failed.', 'error');
       setFormStep('Payment');
       navigate(location.pathname, { replace: true });
     }
   };
 
+  // ── Render states ──────────────────────────────────────────────────────────
 
-  // --- Render Logic ---
+  if (isCartLoading)          return <PageLoader />;
+  if (formStep === 'Verifying') return <PageLoader text="Verifying your payment…" />;
 
-  if (isCartLoading) return <LoadingSpinner />;
-  if (formStep === 'Verifying') return <LoadingSpinner text="Verifying your payment, please wait..." />;
-  
-  const renderShippingForm = () => (
-    <form onSubmit={handleFormSubmit} className="space-y-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-secondary">Shipping Information</h2> {/* _RESPONSIVE-UPDATE_: Responsive heading */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-                <label htmlFor="firstName" className="block text-sm font-semibold text-secondary mb-1">First Name</label>
-                <input type="text" id="firstName" name="firstName" value={shippingInfo.firstName} onChange={handleInputChange} required className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20" />
-            </div>
-            <div>
-                <label htmlFor="lastName" className="block text-sm font-semibold text-secondary mb-1">Last Name</label>
-                <input type="text" id="lastName" name="lastName" value={shippingInfo.lastName} onChange={handleInputChange} required className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20" />
-            </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-secondary mb-1">Email Address</label>
-                <input type="email" id="email" name="email" value={shippingInfo.email} onChange={handleInputChange} required className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20" />
-            </div>
-            <div>
-                <label htmlFor="phone" className="block text-sm font-semibold text-secondary mb-1">Phone Number</label>
-                <input type="tel" id="phone" name="phone" value={shippingInfo.phone} onChange={handleInputChange} required className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20" />
-            </div>
-        </div>
-        <div>
-            <label htmlFor="address" className="block text-sm font-semibold text-secondary mb-1">Street Address</label>
-            <input type="text" id="address" name="address" value={shippingInfo.address} onChange={handleInputChange} required className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20" />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-                <label htmlFor="city" className="block text-sm font-semibold text-secondary mb-1">City</label>
-                <input type="text" id="city" name="city" value={shippingInfo.city} onChange={handleInputChange} required className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20" />
-            </div>
-            <div>
-                <label htmlFor="state" className="block text-sm font-semibold text-secondary mb-1">State</label>
-                <select id="state" name="state" value={shippingInfo.state} onChange={handleInputChange} required className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"> {/* _RESPONSIVE-UPDATE_: Added bg-white for consistency */}
-                    {NIGERIAN_STATES.map(state => <option key={state} value={state}>{state}</option>)}
-                </select>
-            </div>
-        </div>
-        <hr/>
-        <div className="space-y-4">
-            <h3 className="font-semibold text-secondary text-lg sm:text-xl">Shipping Method</h3> {/* _RESPONSIVE-UPDATE_: Responsive heading */}
-            {isLoadingShipping ? (
-                <div className="text-center p-4">Loading...</div>
-            ) : shippingMethods.length > 0 ? (
-                shippingMethods.map(method => (
-                    <label 
-                      key={method.id} 
-                      htmlFor={method.id}
-                      className={`border rounded-xl p-3 sm:p-4 cursor-pointer transition-all ${selectedShippingMethod === method.id ? 'border-primary bg-primary/5' : 'border-gray-200'}`} // _RESPONSIVE-UPDATE_: Responsive padding
-                    >
-                        <div className="flex items-center gap-2 sm:gap-0"> {/* _RESPONSIVE-UPDATE_: Added gap for mobile */}
-                             <input 
-                                type="radio" 
-                                id={method.id} 
-                                name="shippingMethod" 
-                                value={method.id} 
-                                checked={selectedShippingMethod === method.id} 
-                                onChange={() => setSelectedShippingMethod(method.id)}
-                                className="h-4 w-4 text-primary focus:ring-primary"
-                              />
-                            <div className="ml-3 flex-grow">
-                                <span className="font-medium text-secondary text-sm sm:text-base">{method.name}</span> {/* _RESPONSIVE-UPDATE_: Responsive text */}
-                                <p className="text-xs sm:text-sm text-secondary/60">{method.description}</p> {/* _RESPONSIVE-UPDATE_: Responsive text */}
-                            </div>
-                            <span className="font-semibold text-secondary text-sm sm:text-base">{formatPrice(method.price)}</span> {/* _RESPONSIVE-UPDATE_: Responsive text */}
-                        </div>
-                    </label>
-                ))
-            ) : (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-sm text-yellow-800">No shipping methods are available for the selected state.</div>
-            )}
-        </div>
-        <Button type="submit" className="w-full h-12 text-sm sm:text-base" disabled={isProcessing || isLoadingShipping || !selectedShippingMethod}> {/* _RESPONSIVE-UPDATE_: Responsive text */}
-            {isProcessing ? 'Processing...' : 'Continue to Payment'}
-        </Button>
-    </form>
-  );
+  // ── Shipping form ──────────────────────────────────────────────────────────
 
-  const renderPaymentForm = () => (
-    <form onSubmit={handleFormSubmit} className="space-y-6">
-        <div className="border border-gray-200 rounded-xl p-4">
-            <div className="flex justify-between items-center">
-                <h3 className="font-semibold text-secondary text-base sm:text-lg">Ship To</h3> {/* _RESPONSIVE-UPDATE_: Responsive heading */}
-                <Button variant="link" size="sm" onClick={() => setFormStep('Shipping')}>Change</Button>
-            </div>
-            <div className="text-sm text-secondary/80 mt-2 space-y-1"> {/* _RESPONSIVE-UPDATE_: Added space-y for better readability */}
-                <p>{shippingInfo.firstName} {shippingInfo.lastName}</p>
-                <p>{shippingInfo.address}, {shippingInfo.city}, {shippingInfo.state}</p>
-                <p>{shippingInfo.email}</p>
-            </div>
-        </div>
-        <hr/>
-        <div className="space-y-4">
-            <h3 className="font-semibold text-secondary text-lg sm:text-xl">Payment Method</h3> {/* _RESPONSIVE-UPDATE_: Responsive heading */}
-            {paymentMethods.length > 0 ? paymentMethods.map(method => (
-                <label key={method.id} htmlFor={method.id} className={`border rounded-xl p-3 sm:p-4 cursor-pointer transition-all ${selectedPaymentMethod === method.name ? 'border-primary bg-primary/5' : 'border-gray-200'}`} > {/* _RESPONSIVE-UPDATE_: Responsive padding */}
-                    <div className="flex items-center">
-                        <input type="radio" id={method.name} name="paymentMethod" value={method.name} checked={selectedPaymentMethod === method.name} onChange={() => setSelectedPaymentMethod(method.name)} className="h-4 w-4 text-primary focus:ring-primary"/> {/* _RESPONSIVE-UPDATE_: Switched to onChange */}
-                        <div className="ml-3 flex-grow">
-                            <span className="font-medium text-secondary text-sm sm:text-base">{method.displayName}</span> {/* _RESPONSIVE-UPDATE_: Responsive text */}
-                            <p className="text-xs sm:text-sm text-secondary/60">{method.description}</p> {/* _RESPONSIVE-UPDATE_: Responsive text */}
-                        </div>
-                    </div>
-                </label>
-            )) : <p>No payment methods available.</p>}
-        </div>
-        <Button type="submit" className="w-full h-12 text-sm sm:text-base" disabled={isProcessing}> {/* _RESPONSIVE-UPDATE_: Responsive text */}
-            {isProcessing ? 'Processing...' : `Pay ${formatPrice(totalAmount)}`}
-        </Button>
-    </form>
-  );
+  const ShippingForm = () => (
+    <form onSubmit={handleSubmit} className="space-y-10">
+      <SectionTitle>Delivery Details</SectionTitle>
 
-  const renderConfirmation = () => (
-    <div className="text-center py-8 sm:py-12"> {/* _RESPONSIVE-UPDATE_: Responsive padding */}
-      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"> {/* _RESPONSIVE-UPDATE_: Responsive icon size */}
-          <Check size={40} className="text-green-600" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-7">
+        <Field id="firstName" name="firstName" label="First Name"    value={shippingInfo.firstName} onChange={handleInput} />
+        <Field id="lastName"  name="lastName"  label="Last Name"     value={shippingInfo.lastName}  onChange={handleInput} />
+        <Field id="email"     name="email"     type="email" label="Email Address" value={shippingInfo.email} onChange={handleInput} />
+        <Field id="phone"     name="phone"     type="tel"   label="Phone Number"  value={shippingInfo.phone} onChange={handleInput} />
       </div>
-      <h2 className="font-bold text-2xl sm:text-3xl text-secondary mb-4">Order Confirmed!</h2> {/* _RESPONSIVE-UPDATE_: Responsive heading */}
-      <p className="text-secondary/70 max-w-md mx-auto mb-6 text-sm sm:text-base">Thank you for your purchase! A confirmation email has been sent to <span className="font-medium text-secondary">{order?.shippingAddress.email}</span>.</p> {/* _RESPONSIVE-UPDATE_: Responsive text */}
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 sm:p-6 max-w-md mx-auto mb-8 text-left"> {/* _RESPONSIVE-UPDATE_: Responsive padding */}
-          <h3 className="font-semibold text-secondary mb-4 text-base sm:text-lg">Order #{order?.orderNumber}</h3> {/* _RESPONSIVE-UPDATE_: Responsive heading */}
-          {order?.items.map(item => (
-              <div key={item._id} className="flex justify-between items-center text-sm py-2 border-b">
-                  <span className="text-secondary/80 pr-2">{item.name} x {item.quantity}</span> {/* _RESPONSIVE-UPDATE_: Added padding right */}
-                  <span className="font-medium text-secondary text-right flex-shrink-0">{formatPrice(item.price)}</span> {/* _RESPONSIVE-UPDATE_: Added text-right and shrink */}
-              </div>
-          ))}
-          <div className="space-y-2 pt-4">
-              <div className="flex justify-between text-sm"><span className="text-secondary/70">Subtotal</span><span>{formatPrice(order?.subtotal)}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-secondary/70">Shipping</span><span>{formatPrice(order?.shippingFee)}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-secondary/70">Tax</span><span>{formatPrice(order?.taxAmount)}</span></div>
-              <div className="flex justify-between font-bold text-base pt-2 border-t"><span className="text-secondary">Total</span><span>{formatPrice(order?.totalAmount)}</span></div>
+
+      <Field id="address" name="address" label="Street Address" value={shippingInfo.address} onChange={handleInput} />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-7">
+        <Field id="city" name="city" label="City" value={shippingInfo.city} onChange={handleInput} />
+        <Field id="state" name="state" label="State" as="select" value={shippingInfo.state} onChange={handleInput}>
+          {NIGERIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+        </Field>
+      </div>
+
+      {/* Shipping methods */}
+      <div>
+        <SectionTitle>Shipping Method</SectionTitle>
+        {isLoadingShipping ? (
+          <div className="flex items-center gap-3 py-6 text-[12px] text-[#0D0D0D]/40">
+            <div className="w-4 h-4 border border-[#C9A96E]/40 border-t-[#C9A96E] rounded-full animate-spin" />
+            Loading shipping rates…
           </div>
+        ) : shippingMethods.length > 0 ? (
+          <div className="space-y-3">
+            {shippingMethods.map((m) => (
+              <ShippingCard key={m.id} method={m} selected={selectedShippingMethod === m.id} onSelect={setSelectedShippingMethod} subtotal={cart?.subtotal || 0} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 px-4 py-3 border border-amber-200 bg-amber-50 text-[12px] text-amber-700">
+            <AlertTriangle size={13} strokeWidth={1.5} />
+            No shipping methods available for the selected state.
+          </div>
+        )}
       </div>
-      <div className="flex flex-col sm:flex-row gap-4 justify-center"> {/* _RESPONSIVE-UPDATE_: Stack buttons on mobile */}
-          <Button asChild className="text-sm sm:text-base"><Link to="/shop">Continue Shopping</Link></Button> {/* _RESPONSIVE-UPDATE_: Responsive text */}
-          <Button asChild variant="outline" className="text-sm sm:text-base"><Link to={`/orders/${order?._id}`}>View Order</Link></Button> {/* _RESPONSIVE-UPDATE_: Responsive text */}
-      </div>
-    </div>
+
+      <button
+        type="submit"
+        disabled={isProcessing || isLoadingShipping || !selectedShippingMethod}
+        className="w-full flex items-center justify-center bg-[#0D0D0D] text-[#FAF9F7] py-4 text-[11px] tracking-[0.2em] uppercase font-medium hover:bg-[#C9A96E] hover:text-[#0D0D0D] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        Continue to Payment
+      </button>
+    </form>
   );
 
-  const renderOrderSummary = () => (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100/50 sticky top-24">
-      <div className="p-4 sm:p-6 border-b"> {/* _RESPONSIVE-UPDATE_: Responsive padding */}
-        <h2 className="font-bold text-lg sm:text-xl text-secondary">Order Summary</h2> {/* _RESPONSIVE-UPDATE_: Responsive heading */}
+  // ── Payment form ───────────────────────────────────────────────────────────
+
+  const PaymentForm = () => (
+    <form onSubmit={handleSubmit} className="space-y-10">
+      {/* Shipping recap */}
+      <div className="border border-[#0D0D0D]/08 px-5 py-4">
+        <div className="flex justify-between items-start gap-4">
+          <div>
+            <p className="text-[10px] tracking-[0.18em] uppercase text-[#0D0D0D]/35 mb-1.5">Shipping To</p>
+            <p className="text-[13px] text-[#0D0D0D] font-light">{shippingInfo.firstName} {shippingInfo.lastName}</p>
+            <p className="text-[12px] text-[#0D0D0D]/45 font-light mt-0.5">{shippingInfo.address}, {shippingInfo.city}, {shippingInfo.state}</p>
+            <p className="text-[12px] text-[#0D0D0D]/45 font-light">{shippingInfo.email}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setFormStep('Shipping')}
+            className="text-[11px] tracking-[0.15em] uppercase font-medium text-[#0D0D0D]/35 hover:text-[#C9A96E] transition-colors border-b border-transparent hover:border-[#C9A96E]/40 pb-0.5 shrink-0"
+          >
+            Edit
+          </button>
+        </div>
       </div>
-      {cart?.items && ( // _RESPONSIVE-UPDATE_: Check if cart.items exists
-        <div className="p-4 sm:p-6 space-y-4"> {/* _RESPONSIVE-UPDATE_: Responsive padding */}
-          {cart.items.map(item => (
-              <div key={item._id} className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                      <img src={item.productImage} alt={item.productName} className="w-full h-full object-cover"/>
-                  </div>
-                  <div className="flex-grow">
-                      <h4 className="font-medium text-sm text-secondary">{item.productName}</h4>
-                      <p className="text-xs text-secondary/60">Qty: {item.quantity}</p>
-                  </div>
-                  <p className="font-semibold text-secondary text-sm">{formatPrice(item.total)}</p>
-              </div>
+
+      <div>
+        <SectionTitle>Payment Method</SectionTitle>
+        {paymentMethods.length > 0 ? (
+          <div className="space-y-3">
+            {paymentMethods.map((m) => (
+              <PaymentCard key={m.id} method={m} selected={selectedPaymentMethod === m.name} onSelect={setSelectedPaymentMethod} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-[13px] text-[#0D0D0D]/40 font-light">No payment methods available.</p>
+        )}
+      </div>
+
+      <button
+        type="submit"
+        disabled={isProcessing}
+        className="w-full flex items-center justify-center bg-[#0D0D0D] text-[#FAF9F7] py-4 text-[11px] tracking-[0.2em] uppercase font-medium hover:bg-[#C9A96E] hover:text-[#0D0D0D] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        {isProcessing ? 'Processing…' : `Pay ${formatPrice(totalAmount)}`}
+      </button>
+    </form>
+  );
+
+  // ── Confirmation ───────────────────────────────────────────────────────────
+
+  const Confirmation = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="py-8 lg:py-12"
+    >
+      {/* Check mark */}
+      <div className="flex flex-col items-center text-center mb-12">
+        <div className="w-16 h-16 border border-[#C9A96E] flex items-center justify-center mb-7">
+          <Check size={24} strokeWidth={1.5} className="text-[#C9A96E]" />
+        </div>
+        <Eyebrow>Order Confirmed</Eyebrow>
+        <h2 className="font-['Cormorant_Garamond'] text-[clamp(32px,4vw,52px)] font-light text-[#0D0D0D] leading-tight mt-4">
+          Thank you for your order.
+        </h2>
+        <p className="text-[13px] text-[#0D0D0D]/45 font-light max-w-sm mt-3 leading-relaxed">
+          A confirmation has been sent to{' '}
+          <span className="text-[#0D0D0D]">{order?.shippingAddress?.email}</span>. We will be in touch when your order ships.
+        </p>
+      </div>
+
+      {/* Order detail */}
+      <div className="max-w-lg mx-auto border border-[#0D0D0D]/08">
+        <div className="px-6 py-4 border-b border-[#0D0D0D]/08 flex justify-between items-center">
+          <p className="text-[10px] tracking-[0.18em] uppercase text-[#0D0D0D]/35">Order Reference</p>
+          <p className="font-['Cormorant_Garamond'] text-[18px] font-light text-[#0D0D0D]">#{order?.orderNumber}</p>
+        </div>
+
+        <div className="px-6 py-5 space-y-3.5">
+          {order?.items?.map((item) => (
+            <div key={item._id} className="flex justify-between items-center text-[13px]">
+              <span className="text-[#0D0D0D]/60 font-light">{item.name} × {item.quantity}</span>
+              <span className="font-medium text-[#0D0D0D]">{formatPrice(item.price)}</span>
+            </div>
           ))}
         </div>
-      )}
-      <div className="p-4 sm:p-6 space-y-3 border-t"> {/* _RESPONSIVE-UPDATE_: Responsive padding */}
-          <div className="flex justify-between text-sm"><span className="text-secondary/70">Subtotal</span><span className="font-medium text-secondary">{formatPrice(cart?.subtotal)}</span></div> {/* _RESPONSIVE-UPDATE_: Optional chaining */}
-          <div className="flex justify-between text-sm"><span className="text-secondary/70">Shipping</span><span className="font-medium text-secondary">{selectedShippingMethod ? formatPrice(shippingFee) : '---'}</span></div>
-          <div className="flex justify-between text-sm"><span className="text-secondary/70">Tax ({taxRate}%)</span><span className="font-medium text-secondary">{formatPrice(taxAmount)}</span></div>
-          <div className="flex justify-between items-center pt-4 border-t font-bold text-base sm:text-lg"><span className="text-secondary">Total</span><span className="text-secondary">{formatPrice(totalAmount)}</span></div> {/* _RESPONSIVE-UPDATE_: Responsive text */}
+
+        <div className="px-6 py-5 border-t border-[#0D0D0D]/08 space-y-2.5">
+          {[
+            ['Subtotal',  formatPrice(order?.subtotal)],
+            ['Shipping',  formatPrice(order?.shippingFee)],
+            ['Tax',       formatPrice(order?.taxAmount)],
+          ].map(([label, val]) => (
+            <div key={label} className="flex justify-between text-[13px]">
+              <span className="text-[#0D0D0D]/45 font-light">{label}</span>
+              <span className="font-medium text-[#0D0D0D]">{val}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="px-6 py-4 border-t border-[#0D0D0D]/08 flex justify-between items-baseline">
+          <span className="text-[11px] tracking-[0.12em] uppercase font-medium text-[#0D0D0D]">Total</span>
+          <span className="font-['Cormorant_Garamond'] text-[26px] font-light text-[#0D0D0D]">{formatPrice(order?.totalAmount)}</span>
+        </div>
       </div>
-    </div>
+
+      {/* Actions */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
+        <Link
+          to="/shop"
+          className="group inline-flex items-center justify-center gap-2 bg-[#0D0D0D] text-[#FAF9F7] px-10 py-4 text-[11px] tracking-[0.2em] uppercase font-medium hover:bg-[#C9A96E] hover:text-[#0D0D0D] transition-all duration-300"
+        >
+          Continue Shopping
+        </Link>
+        <Link
+          to={`/orders/${order?._id}`}
+          className="inline-flex items-center justify-center gap-2 border border-[#0D0D0D]/20 text-[#0D0D0D] px-10 py-4 text-[11px] tracking-[0.2em] uppercase font-medium hover:border-[#0D0D0D] transition-all duration-300"
+        >
+          View Order
+        </Link>
+      </div>
+    </motion.div>
   );
+
+  const isComplete = formStep === 'Complete';
 
   return (
-    <div className="bg-gray-50/30 min-h-screen py-8 sm:py-12"> {/* _RESPONSIVE-UPDATE_: Responsive padding */}
-      <div className="container max-w-7xl px-4"> {/* _RESPONSIVE-UPDATE_: Added horizontal padding */}
-        <CheckoutProgress step={formStep} setStep={setFormStep} />
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-           <main className={`lg:col-span-3 ${formStep === 'Confirmation' && 'lg:col-span-5'} bg-white rounded-2xl shadow-sm border border-gray-100/50 p-4 sm:p-6`}> {/* _RESPONSIVE-UPDATE_: Responsive padding */}
-              <AnimatePresence mode="wait">
-                  <motion.div
-                      key={formStep}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                  >
-                      {formStep === 'Shipping' && renderShippingForm()}
-                      {formStep === 'Payment' && renderPaymentForm()}
-                      {formStep === 'Confirmation' && renderConfirmation()}
-                  </motion.div>
-              </AnimatePresence>
-            </main>
-            {formStep !== 'Confirmation' && (
-              <aside className="lg:col-span-2">
-                {renderOrderSummary()}
-              </aside>
-            )}
+    <div className="bg-[#FAF9F7] min-h-screen">
+
+      {/* Page header */}
+      <div className="border-b border-[#0D0D0D]/08 px-8 lg:px-20 py-14 lg:py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="max-w-[1440px] mx-auto"
+        >
+          <Eyebrow>Secure Checkout</Eyebrow>
+          <h1 className="font-['Cormorant_Garamond'] text-[clamp(36px,5vw,64px)] font-light text-[#0D0D0D] leading-tight mt-4">
+            {isComplete ? 'Order Complete' : 'Checkout'}
+            <span className="text-[#C9A96E]">.</span>
+          </h1>
+        </motion.div>
+      </div>
+
+      {/* Body */}
+      <div className="max-w-[1440px] mx-auto px-8 lg:px-20 py-12 lg:py-16">
+        <CheckoutProgress step={isComplete ? 'Complete' : formStep} />
+
+        <div className={`grid grid-cols-1 ${!isComplete ? 'lg:grid-cols-[1fr_380px]' : ''} gap-12 lg:gap-16 items-start`}>
+
+          {/* Main form */}
+          <div className="bg-[#FAF9F7]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={formStep}
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 16 }}
+                transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+              >
+                {formStep === 'Shipping' && <ShippingForm />}
+                {formStep === 'Payment'  && <PaymentForm  />}
+                {formStep === 'Complete' && <Confirmation />}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Sidebar — hidden on confirmation */}
+          {!isComplete && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.1 }}
+            >
+              <OrderSummary
+                cart={cart}
+                shippingFee={shippingFee}
+                taxAmount={taxAmount}
+                totalAmount={totalAmount}
+                selectedShippingMethod={selectedShippingMethod}
+              />
+            </motion.div>
+          )}
         </div>
       </div>
     </div>
