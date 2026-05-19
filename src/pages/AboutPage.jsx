@@ -2,6 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, Gem, Leaf, BrainCircuit } from 'lucide-react';
+import { siteImages } from '../lib/siteImages';
+import SafeImage from '../components/ui/SafeImage';
+import PageHero from '../components/layout/PageHero';
 
 // ── Design-system primitives ────────────────────────────────────────────────
 
@@ -56,30 +59,10 @@ const valuesData = [
 ];
 
 const teamData = [
-  {
-    name: 'Adebola Adeyemi',
-    role: 'Founder & Creative Director',
-    image:
-      'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=761&q=80',
-  },
-  {
-    name: 'Chioma Okonkwo',
-    role: 'Head Perfumer',
-    image:
-      'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=687&q=80',
-  },
-  {
-    name: 'Oluwaseun Adeyemi',
-    role: 'Operations Director',
-    image:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=687&q=80',
-  },
-  {
-    name: 'Amara Nwosu',
-    role: 'Marketing Director',
-    image:
-      'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=687&q=80',
-  },
+  { name: 'Adebola Adeyemi', role: 'Founder & Creative Director', image: siteImages.team1 },
+  { name: 'Chioma Okonkwo', role: 'Head Perfumer', image: siteImages.team2 },
+  { name: 'Oluwaseun Adeyemi', role: 'Operations Director', image: siteImages.team3 },
+  { name: 'Amara Nwosu', role: 'Marketing Director', image: siteImages.team4 },
 ];
 
 // ── Sub-components ───────────────────────────────────────────────────────────
@@ -121,11 +104,10 @@ const TeamCard = React.memo(({ name, role, image }) => (
     className="group"
   >
     <div className="aspect-[3/4] overflow-hidden bg-[#F0EDE8] mb-5">
-      <img
+      <SafeImage
         src={image}
         alt={name}
         className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-[1.04]"
-        loading="lazy"
       />
     </div>
     <div className="pt-1 border-t border-[#0D0D0D]/08">
@@ -143,37 +125,19 @@ const AboutPage = () => {
   return (
     <div className="bg-[#FAF9F7]">
 
-      {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section className="relative min-h-[70vh] flex items-end overflow-hidden">
-        {/* Full-bleed image */}
-        <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1599446794254-16ca8daa4c48?auto=format&fit=crop&w=1770&q=85"
-            alt="Scenture Lagos atelier"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D0D]/80 via-[#0D0D0D]/30 to-transparent" />
-        </div>
-
-        <div className="relative z-10 w-full max-w-[1440px] mx-auto px-8 lg:px-20 pb-20 lg:pb-28">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={stagger}
-            className="max-w-3xl"
-          >
-            <motion.div variants={fadeUp}><Eyebrow>Est. Lagos, 2018</Eyebrow></motion.div>
-            <motion.h1
-              variants={fadeUp}
-              custom={0.1}
-              className="font-['Cormorant_Garamond'] text-[clamp(44px,7vw,88px)] font-light text-[#FAF9F7] leading-[0.95] tracking-tight mt-5"
-            >
-              Crafting memories,<br />
-              <em className="italic text-[#C9A96E] font-light">one scent at a time.</em>
-            </motion.h1>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Est. Lagos, 2018"
+        title={
+          <>
+            Crafting memories,
+            <br />
+            <em className="italic text-[#C9A96E] font-light">one scent at a time.</em>
+          </>
+        }
+        subtitle="Born in Lagos, Scenture crafts fragrances and home scents that honour tradition while embracing modern luxury."
+        image={siteImages.aboutHero}
+        imageAlt={siteImages.aboutHeroAlt}
+      />
 
       {/* ── STORY ─────────────────────────────────────────────────────────── */}
       <section className="py-28 lg:py-36 px-8 lg:px-20">
@@ -189,9 +153,9 @@ const AboutPage = () => {
               className="relative"
             >
               <div className="aspect-[4/5] overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1032&q=80"
-                  alt="Scenture Lagos founder"
+                <SafeImage
+                  src={siteImages.aboutDetail}
+                  alt="Scenture Lagos fragrance atelier"
                   className="w-full h-full object-cover"
                 />
               </div>

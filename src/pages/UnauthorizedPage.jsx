@@ -2,94 +2,139 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { ShieldAlert, ArrowLeft, Home } from 'lucide-react';
-import { Button } from '../components/ui/Button';
+import { ArrowLeft, ArrowUpRight, ShieldOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
-// --- Decorative Background Component ---
-const FloatingShape = ({ className, initial, animate }) => (
-    <motion.div
-        className={`absolute hidden lg:block border border-red-200/20 rounded-full ${className}`}
-        initial={initial}
-        animate={animate}
-        transition={{
-            duration: Math.random() * 8 + 20,
-            repeat: Infinity,
-            repeatType: 'mirror',
-            ease: 'easeInOut'
-        }}
-    />
+// ── Primitives ───────────────────────────────────────────────────────────────
+
+const Eyebrow = ({ children }) => (
+  <span className="text-[10px] tracking-[0.25em] uppercase text-[#C9A96E] font-medium">{children}</span>
 );
 
-// --- Main Page Component ---
+// ── Page ─────────────────────────────────────────────────────────────────────
+
 const UnauthorizedPage = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center bg-red-50/20 relative overflow-hidden p-4">
-      <Helmet>
-        <title>Unauthorized Access | Scenture Lagos</title>
-      </Helmet>
+    <>
+      <Helmet><title>Access Denied | Scenture Lagos</title></Helmet>
 
-      {/* Background Shapes */}
-      <FloatingShape className="w-32 h-32" initial={{ top: '15%', left: '10%' }} animate={{ y: [0, -20, 0] }} />
-      <FloatingShape className="w-16 h-16 bg-red-100/30" initial={{ top: '25%', right: '15%' }} animate={{ y: [0, 25, 0] }} />
-      <FloatingShape className="w-24 h-24" initial={{ bottom: '20%', left: '20%' }} animate={{ y: [0, 15, 0] }} />
-      
-      <div className="relative z-10 text-center max-w-xl mx-auto">
-        <motion.div
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 150, damping: 15, delay: 0.1 }}
-          className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-white shadow-lg"
-        >
-          <ShieldAlert size={48} className="text-red-500" />
-        </motion.div>
+      <div className="min-h-screen bg-[#FAF9F7] relative overflow-hidden flex items-center">
 
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut', delay: 0.3 }}
-          className="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight"
+        {/* Ghost numeral background */}
+        <div
+          aria-hidden
+          className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
         >
-          Access Denied
-        </motion.h1>
+          <span
+            className="font-['Cormorant_Garamond'] font-light text-[#0D0D0D]/[0.03] leading-none"
+            style={{ fontSize: 'clamp(160px, 32vw, 400px)' }}
+          >
+            401
+          </span>
+        </div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut', delay: 0.4 }}
-          className="mt-4 text-slate-600"
-        >
-          You do not have the necessary permissions to view this page. Please contact an administrator if you believe this is an error.
-        </motion.p>
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut', delay: 0.5 }}
-          className="mt-8 flex flex-col sm:flex-row gap-4 justify-center"
-        >
-            <Button asChild size="lg" className="rounded-full">
-                <Link to={currentUser ? '/account' : '/'}>
-                  <Home className="mr-2 h-5 w-5" />
-                  <span>{currentUser ? 'Go to My Account' : 'Go to Homepage'}</span>
-                </Link>
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="lg"
-              className="rounded-full"
-              onClick={() => navigate(-1)}
+        {/* Accent rules */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-[#C9A96E]/20" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-[#C9A96E]/20" />
+
+        {/* Content */}
+        <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-20 py-20">
+          <div className="max-w-xl">
+
+            {/* Icon */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="w-14 h-14 border border-[#C9A96E]/35 flex items-center justify-center text-[#C9A96E] mb-8"
             >
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              <span>Go Back</span>
-            </Button>
-        </motion.div>
+              <ShieldOff size={20} strokeWidth={1.5} />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
+              <Eyebrow>Error 401</Eyebrow>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.08 }}
+              className="font-['Cormorant_Garamond'] font-light text-[#0D0D0D] leading-[0.95] tracking-tight mt-5"
+              style={{ fontSize: 'clamp(48px, 7vw, 88px)' }}
+            >
+              Access<br />
+              <em className="italic text-[#0D0D0D]/30 font-light">denied.</em>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.75, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.15 }}
+              className="mt-6 text-[14px] sm:text-[15px] text-[#0D0D0D]/45 font-light leading-relaxed max-w-sm"
+            >
+              You don't have permission to view this page. If you believe this is a mistake, please contact our support team.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.75, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.22 }}
+              className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+            >
+              <Link
+                to={currentUser ? '/account' : '/'}
+                className="group inline-flex items-center gap-2.5 bg-[#0D0D0D] text-[#FAF9F7] px-8 py-4 text-[11px] tracking-[0.2em] uppercase font-medium hover:bg-[#C9A96E] hover:text-[#0D0D0D] transition-all duration-300"
+              >
+                {currentUser ? 'My Account' : 'Homepage'}
+                <ArrowUpRight size={13} strokeWidth={1.5} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </Link>
+
+              <button
+                onClick={() => navigate(-1)}
+                className="group inline-flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase font-medium text-[#0D0D0D]/40 hover:text-[#0D0D0D] transition-colors border-b border-transparent hover:border-[#0D0D0D]/25 pb-0.5"
+              >
+                <ArrowLeft size={12} strokeWidth={1.5} />
+                Go Back
+              </button>
+            </motion.div>
+
+            {/* Quick links */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.75, delay: 0.35 }}
+              className="mt-14 pt-8 border-t border-[#0D0D0D]/08"
+            >
+              <p className="text-[10px] tracking-[0.2em] uppercase text-[#0D0D0D]/25 mb-5 font-medium">Navigate to</p>
+              <div className="flex flex-wrap gap-x-8 gap-y-3">
+                {[
+                  { to: '/shop',    label: 'Shop'      },
+                  { to: '/about',   label: 'About Us'  },
+                  { to: '/contact', label: 'Contact'   },
+                  { to: '/login',   label: 'Sign In'   },
+                ].map(({ to, label }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    className="text-[12px] tracking-[0.12em] uppercase font-medium text-[#0D0D0D]/35 hover:text-[#C9A96E] transition-colors border-b border-transparent hover:border-[#C9A96E]/35 pb-0.5"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

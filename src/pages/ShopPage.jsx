@@ -6,6 +6,8 @@ import { SlidersHorizontal, X, ChevronDown, AlertCircle, ShoppingBag } from 'luc
 
 import ProductService from '../services/product.service';
 import ProductCard from '../components/product/ProductCard';
+import PageHero from '../components/layout/PageHero';
+import { siteImages } from '../lib/siteImages';
 
 // ── Design-system primitives ────────────────────────────────────────────────
 
@@ -128,29 +130,17 @@ export default function ShopPage() {
   return (
     <div className="bg-[#FAF9F7] min-h-screen">
 
-      {/* ── PAGE HEADER ──────────────────────────────────────────────────── */}
-      <section className="border-b border-[#0D0D0D]/08 py-20 lg:py-24 px-8 lg:px-20">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={stagger}
-          className="max-w-[1440px] mx-auto"
-        >
-          <motion.div variants={fadeUp}><Eyebrow>The Collection</Eyebrow></motion.div>
-          <motion.h1
-            variants={fadeUp}
-            className="font-['Cormorant_Garamond'] text-[clamp(44px,6vw,80px)] font-light text-[#0D0D0D] leading-[0.95] tracking-tight mt-5"
-          >
+      <PageHero
+        eyebrow="The Collection"
+        title={
+          <>
             Our Fragrances<span className="text-[#C9A96E]">.</span>
-          </motion.h1>
-          <motion.p
-            variants={fadeUp}
-            className="mt-5 text-[14px] text-[#0D0D0D]/50 font-light max-w-md leading-relaxed"
-          >
-            Meticulously crafted fragrances and diffusers designed to elevate your everyday.
-          </motion.p>
-        </motion.div>
-      </section>
+          </>
+        }
+        subtitle="Meticulously crafted fragrances and diffusers designed to elevate your everyday."
+        image={siteImages.shopHero}
+        imageAlt={siteImages.shopHeroAlt}
+      />
 
       {/* ── TOOLBAR ──────────────────────────────────────────────────────── */}
       <div className="border-b border-[#0D0D0D]/08 px-8 lg:px-20 py-5">

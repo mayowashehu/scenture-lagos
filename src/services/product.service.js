@@ -1,5 +1,12 @@
 // src/services/product.service.js
-import api from './api'; // Assuming you have an axios instance configured here
+import api from './api';
+import { useMockData } from '../lib/useMockData';
+import {
+  filterMockProducts,
+  getMockProductBySlug,
+  getMockFeaturedProducts,
+  mockCategories,
+} from '../lib/mockProducts';
 
 /**
  * A centralized error handler that logs the error and throws a new,
@@ -21,6 +28,9 @@ const ProductService = {
    * @returns {Promise<Object>} A promise that resolves to the API response data.
    */
   getProducts: async (params = {}) => {
+    if (useMockData()) {
+      return filterMockProducts(params);
+    }
     try {
       const sortMap = {
         'price-low-high': 'price-asc',
@@ -46,6 +56,11 @@ const ProductService = {
    */
   getProduct: async (slug) => {
     if (!slug) throw new Error('A product slug must be provided.');
+    if (useMockData()) {
+      const result = getMockProductBySlug(slug);
+      if (!result) throw new Error('Product not found.');
+      return result;
+    }
     try {
       const response = await api.get(`/products/${slug}`);
       return response.data.data;
@@ -61,6 +76,9 @@ const ProductService = {
    * @returns {Promise<Array>} A promise that resolves to an array of product objects.
    */
   getFeaturedProducts: async (limit = 4) => {
+    if (useMockData()) {
+      return getMockFeaturedProducts(limit);
+    }
     try {
       const response = await api.get('/products/featured', { params: { limit } });
       // Ensure we always return an array, even if the API response is slightly different.
@@ -75,6 +93,9 @@ const ProductService = {
    * @returns {Promise<Object>} Categories data
    */
   getCategories: async () => {
+    if (useMockData()) {
+      return mockCategories;
+    }
     try {
       const response = await api.get('/categories', { params: { parent: 'none' } });
       return response.data.data.categories || [];

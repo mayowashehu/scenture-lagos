@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { ShoppingBag, Loader2 } from 'lucide-react';
 import { formatPrice } from '../../lib/utils';
 import { useCart } from '../../contexts/CartContext';
+import SafeImage from '../ui/SafeImage';
+import { productImageUrls } from '../../lib/siteImages';
 
 const ProductCard = React.memo(({ product }) => {
   const { addToCart, isLoading: isAddingToCart } = useCart();
@@ -11,7 +13,8 @@ const ProductCard = React.memo(({ product }) => {
   if (!product) return null;
 
   const mainImage = product.images?.find((img) => img.isMain) || product.images?.[0];
-  const productImgUrl = mainImage?.url || 'https://via.placeholder.com/400?text=Scenture';
+  const productImgUrl =
+    mainImage?.url || product.image || product.thumbnail || productImageUrls.fragrance1;
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -27,11 +30,10 @@ const ProductCard = React.memo(({ product }) => {
       {/* Image area */}
       <Link to={`/product/${product.slug}`} className="block overflow-hidden relative" tabIndex={-1}>
         <div className="aspect-[3/4] overflow-hidden bg-[#F0EDE8]">
-          <img
+          <SafeImage
             src={productImgUrl}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-[1.04]"
-            loading="lazy"
           />
         </div>
 

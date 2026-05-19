@@ -1,40 +1,44 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Mail, ArrowLeft, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { Button } from '../components/ui/Button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/Card';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, ArrowUpRight, Mail } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import AuthService from '../services/auth.service';
+import { siteImages } from '../lib/siteImages';
+
+// ── Primitives ───────────────────────────────────────────────────────────────
+
+const Eyebrow = ({ children }) => (
+  <span className="text-[10px] tracking-[0.25em] uppercase text-[#C9A96E] font-medium">{children}</span>
+);
+
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.75, ease: [0.25, 0.46, 0.45, 0.94] } },
+};
+
+// ── Page ─────────────────────────────────────────────────────────────────────
 
 const ForgotPasswordPage = () => {
-  // State for form fields and UI
-  const [email, setEmail] = useState('');
+  const [email,        setEmail]        = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState('');
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [formError,    setFormError]    = useState('');
+  const [isSuccess,    setIsSuccess]    = useState(false);
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError('');
-    
-    // Validate email
-    if (!email) {
-      setFormError('Please enter your email address');
-      return;
-    }
-
+    if (!email) { setFormError('Please enter your email address.'); return; }
     try {
       setIsSubmitting(true);
-      
-      // Call the forgot password API
       await AuthService.forgotPassword({ email });
-      
-      // Show success message
       setIsSuccess(true);
     } catch (err) {
-      console.error('Forgot password error:', err);
       setFormError(err.response?.data?.message || 'Failed to process your request. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -43,94 +47,161 @@ const ForgotPasswordPage = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Forgot Password | Scenture Lagos</title>
-      </Helmet>
-      
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md"
-        >
-          <Card className="border-slate-200 shadow-lg">
-            <CardHeader className="space-y-1 text-center">
-              <CardTitle className="text-2xl font-heading">
-                {isSuccess ? 'Check Your Email' : 'Forgot Password'}
-              </CardTitle>
-              <CardDescription className="text-slate-500">
-                {isSuccess 
-                  ? 'We have sent you instructions to reset your password'
-                  : 'Enter your email and we\'ll send you a link to reset your password'}
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent>
-              {formError && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-start gap-2">
-                  <AlertCircle size={18} className="mt-0.5 flex-shrink-0" />
-                  <span>{formError}</span>
-                </div>
-              )}
-              
+      <Helmet><title>Reset Password | Scenture Lagos</title></Helmet>
+
+      <div className="min-h-screen bg-[#FAF9F7] grid grid-cols-1 lg:grid-cols-2">
+
+        {/* ── LEFT — image panel ─────────────────────────────────────── */}
+        <div className="hidden lg:flex relative overflow-hidden bg-[#0D0D0D] flex-col justify-between p-14">
+          <img
+            src={siteImages.authForgot}
+            alt="Scenture Lagos"
+            className="absolute inset-0 w-full h-full object-cover opacity-25"
+          />
+          <div className="relative z-10">
+            <Link to="/" className="font-['Cormorant_Garamond'] text-[18px] font-light tracking-[0.12em] text-[#FAF9F7]">
+              SCENTURE <span className="italic text-[#C9A96E]">Lagos</span>
+            </Link>
+          </div>
+          <div className="relative z-10">
+            <p className="font-['Cormorant_Garamond'] text-[clamp(30px,3vw,46px)] font-light text-[#FAF9F7] leading-[1.05]">
+              We've got you<br />
+              <em className="italic text-[#C9A96E]">covered.</em>
+            </p>
+            <p className="text-[13px] text-[#FAF9F7]/35 font-light mt-4 max-w-xs leading-relaxed">
+              Enter your email and we'll send you a link to reset your password within minutes.
+            </p>
+          </div>
+        </div>
+
+        {/* ── RIGHT — form panel ─────────────────────────────────────── */}
+        <div className="flex flex-col justify-center px-6 sm:px-12 lg:px-16 xl:px-24 py-16 lg:py-0">
+
+          {/* Mobile logo */}
+          <div className="lg:hidden mb-10">
+            <Link to="/" className="font-['Cormorant_Garamond'] text-[18px] font-light tracking-[0.12em] text-[#0D0D0D]">
+              SCENTURE <span className="italic text-[#C9A96E]">Lagos</span>
+            </Link>
+          </div>
+
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={stagger}
+            className="w-full max-w-sm mx-auto lg:mx-0"
+          >
+            <AnimatePresence mode="wait">
+
+              {/* ── Success state ─────────────────────────────────────── */}
               {isSuccess ? (
-                <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg flex items-start gap-3">
-                  <CheckCircle2 size={20} className="mt-0.5 flex-shrink-0" />
-                  <div className="space-y-2">
-                    <p>We've sent an email to <strong>{email}</strong> with instructions to reset your password.</p>
-                    <p className="text-sm">If you don't see the email in your inbox, please check your spam folder.</p>
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.75, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  className="space-y-8"
+                >
+                  {/* Icon */}
+                  <div className="w-14 h-14 border border-[#C9A96E]/40 flex items-center justify-center text-[#C9A96E]">
+                    <Mail size={20} strokeWidth={1.5} />
                   </div>
-                </div>
+
+                  <div>
+                    <Eyebrow>Email Sent</Eyebrow>
+                    <h1 className="font-['Cormorant_Garamond'] text-[clamp(34px,4vw,50px)] font-light text-[#0D0D0D] leading-tight mt-3">
+                      Check your<br />
+                      <em className="italic text-[#0D0D0D]/40 font-light">inbox.</em>
+                    </h1>
+                  </div>
+
+                  <div className="border border-[#C9A96E]/25 bg-[#C9A96E]/04 px-5 py-4 text-[13px] text-[#0D0D0D]/60 font-light leading-relaxed">
+                    We sent a reset link to{' '}
+                    <span className="text-[#0D0D0D] font-medium">{email}</span>.
+                    If it doesn't appear, check your spam folder.
+                  </div>
+
+                  <Link
+                    to="/login"
+                    className="group inline-flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase font-medium text-[#0D0D0D]/40 hover:text-[#0D0D0D] transition-colors border-b border-transparent hover:border-[#0D0D0D]/25 pb-0.5"
+                  >
+                    <ArrowLeft size={12} strokeWidth={1.5} />
+                    Back to Sign In
+                  </Link>
+                </motion.div>
+
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm font-medium text-slate-700">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+
+                /* ── Form state ───────────────────────────────────────── */
+                <motion.div key="form" className="space-y-0">
+                  <motion.div variants={fadeUp}><Eyebrow>Password Reset</Eyebrow></motion.div>
+                  <motion.h1
+                    variants={fadeUp}
+                    className="font-['Cormorant_Garamond'] text-[clamp(34px,4vw,50px)] font-light text-[#0D0D0D] leading-tight mt-3 mb-10"
+                  >
+                    Forgot your<br />
+                    <em className="italic text-[#0D0D0D]/40 font-light">password?</em>
+                  </motion.h1>
+
+                  {/* Error */}
+                  <AnimatePresence>
+                    {formError && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mb-6 text-[12px] font-light px-4 py-3 border border-red-200 text-red-700 bg-red-50"
+                      >
+                        {formError}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <motion.form variants={fadeUp} onSubmit={handleSubmit} className="space-y-8">
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="email" className="text-[10px] tracking-[0.2em] uppercase text-[#0D0D0D]/40 font-medium">
+                        Email Address
+                      </label>
                       <input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="you@example.com"
-                        className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-                        required
+                        id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                        placeholder="hello@example.com" required
+                        className="w-full bg-transparent border-b border-[#0D0D0D]/12 py-3.5 text-[14px] text-[#0D0D0D] placeholder-[#0D0D0D]/20 font-light focus:outline-none focus:border-[#C9A96E] transition-colors duration-300"
                       />
                     </div>
-                  </div>
-                  
-                  <Button
-                    type="submit"
-                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <span className="flex items-center justify-center">
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Sending...
-                      </span>
-                    ) : (
-                      'Send Reset Link'
-                    )}
-                  </Button>
-                </form>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="group w-full flex items-center justify-center gap-2.5 bg-[#0D0D0D] text-[#FAF9F7] py-4 text-[11px] tracking-[0.2em] uppercase font-medium hover:bg-[#C9A96E] hover:text-[#0D0D0D] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <span className="w-3.5 h-3.5 border border-[#FAF9F7]/40 border-t-[#FAF9F7] rounded-full animate-spin" />
+                          Sending…
+                        </>
+                      ) : (
+                        <>
+                          Send Reset Link
+                          <ArrowUpRight size={13} strokeWidth={1.5} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        </>
+                      )}
+                    </button>
+                  </motion.form>
+
+                  <motion.div variants={fadeUp} className="mt-8">
+                    <Link
+                      to="/login"
+                      className="group inline-flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase font-medium text-[#0D0D0D]/35 hover:text-[#0D0D0D] transition-colors border-b border-transparent hover:border-[#0D0D0D]/25 pb-0.5"
+                    >
+                      <ArrowLeft size={12} strokeWidth={1.5} />
+                      Back to Sign In
+                    </Link>
+                  </motion.div>
+                </motion.div>
               )}
-            </CardContent>
-            
-            <CardFooter className="flex justify-center">
-              <Link to="/login" className="flex items-center text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-                <ArrowLeft size={16} className="mr-1" />
-                Back to Login
-              </Link>
-            </CardFooter>
-          </Card>
-        </motion.div>
+            </AnimatePresence>
+          </motion.div>
+        </div>
+
       </div>
     </>
   );

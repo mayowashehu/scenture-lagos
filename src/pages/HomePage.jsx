@@ -8,6 +8,8 @@ import { AlertTriangle, ArrowUpRight } from 'lucide-react';
 import ProductCard from '../components/product/ProductCard';
 import ProductService from '../services/product.service';
 import { testimonials } from '../lib/mockData';
+import { siteImages } from '../lib/siteImages';
+import SafeImage from '../components/ui/SafeImage';
 
 // Shared animation primitives
 const fadeUp = {
@@ -47,7 +49,7 @@ const HomePage = () => {
       <section className="relative min-h-[100svh] grid grid-cols-1 lg:grid-cols-[1fr_1fr] overflow-hidden">
 
         {/* Left — editorial text block */}
-        <div className="relative z-10 flex flex-col justify-end lg:justify-center px-8 lg:px-20 pt-32 pb-20 lg:py-0 bg-[#FAF9F7] lg:bg-transparent">
+        <div className="relative z-10 flex flex-col justify-end lg:justify-center px-8 lg:px-20 order-2 lg:order-1 pt-10 pb-14 lg:pt-32 lg:pb-20 lg:py-0 bg-[#FAF9F7]">
           <motion.div
             initial="hidden"
             animate="visible"
@@ -112,13 +114,9 @@ const HomePage = () => {
           initial={{ opacity: 0, scale: 1.04 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="relative h-[60vw] lg:h-full min-h-[400px] overflow-hidden"
+          className="relative order-1 lg:order-2 h-[50vh] sm:h-[55vh] lg:h-full min-h-[300px] lg:min-h-[500px] overflow-hidden bg-[#E8E4DE]"
         >
-          <img
-            src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&auto=format&fit=crop&w=1032&q=90"
-            alt="Luxury fragrance bottles"
-            className="w-full h-full object-cover"
-          />
+          <SafeImage src={siteImages.hero} alt={siteImages.heroAlt} className="absolute inset-0 w-full h-full object-cover" loading="eager" />
           {/* Warm gradient overlay — blends left edge into bg on large screens */}
           <div className="hidden lg:block absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-[#FAF9F7] to-transparent" />
           
@@ -207,11 +205,7 @@ const HomePage = () => {
               className="relative"
             >
               <div className="aspect-[4/5] overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80"
-                  alt="Scenture Lagos atelier"
-                  className="w-full h-full object-cover"
-                />
+                <SafeImage src={siteImages.atelier} alt={siteImages.atelierAlt} className="w-full h-full object-cover" />
               </div>
               {/* Accent corner */}
               <div className="absolute -bottom-5 -right-5 w-16 h-16 border border-[#C9A96E]/40" />
