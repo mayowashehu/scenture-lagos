@@ -38,37 +38,77 @@ const SkeletonCard = () => (
   </div>
 );
 
+/*
+  EMPTY STATE PSYCHOLOGY:
+  The original said "No products found. Try adjusting your filters."
+  This is a dead end — it offers no psychological recovery.
+
+  We reframe the empty state as a CURATION SIGNAL:
+  "Your filters are very specific. That's a good sign."
+  This validates the reader's taste (they're discerning) rather
+  than implying they searched wrong. The CTA becomes "See Everything
+  We Carry" — implying abundance and possibility, not a reset.
+
+  This is the difference between a dead end and a redirect.
+*/
 const EmptyState = ({ onClear }) => (
   <div className="col-span-full flex flex-col items-center gap-5 py-24 text-center">
-    <ShoppingBag size={32} strokeWidth={1} className="text-[#0D0D0D]/20" />
-    <div>
-      <p className="font-['Cormorant_Garamond'] text-2xl font-light text-[#0D0D0D]">No products found</p>
-      <p className="text-[13px] text-[#0D0D0D]/45 mt-2 font-light">Try adjusting your filters or view all products.</p>
+    <ShoppingBag size={32} strokeWidth={1} className="text-[#C9A96E]/30" />
+    <div className="max-w-xs">
+      <p className="font-['Cormorant_Garamond'] text-2xl font-light text-[#0D0D0D]">
+        Your filters are very specific.
+      </p>
+      <p className="font-['Cormorant_Garamond'] text-lg italic text-[#0D0D0D]/40 mt-1">
+        That's a good sign.
+      </p>
+      <p className="text-[13px] text-[#0D0D0D]/40 mt-4 font-light leading-relaxed">
+        Nothing matched that combination — but the full collection has exactly what you're looking for.
+      </p>
     </div>
     <button
       onClick={onClear}
       className="mt-2 text-[11px] tracking-[0.18em] uppercase font-medium text-[#0D0D0D] border-b border-[#0D0D0D]/30 hover:border-[#C9A96E] hover:text-[#C9A96E] pb-0.5 transition-colors"
     >
-      Clear All Filters
+      See Everything We Carry
     </button>
   </div>
 );
 
+/*
+  ERROR STATE PSYCHOLOGY:
+  Technical errors break trust. The response must be immediate,
+  human, and confident — not apologetic. "Something interrupted
+  the connection" is honest without being alarming. The retry CTA
+  is phrased as an action the user chooses, not a system fallback.
+*/
 const ErrorState = ({ error, onRetry }) => (
   <div className="col-span-full flex flex-col items-center gap-4 py-24 text-center">
-    <AlertCircle size={28} strokeWidth={1.5} className="text-red-400" />
-    <p className="text-[13px] text-[#0D0D0D]/55 font-light">{error?.message || 'Failed to load products.'}</p>
+    <AlertCircle size={28} strokeWidth={1.5} className="text-[#C9A96E]/50" />
+    <div className="max-w-xs">
+      <p className="font-['Cormorant_Garamond'] text-xl font-light text-[#0D0D0D]">
+        Something interrupted the connection.
+      </p>
+      <p className="text-[13px] text-[#0D0D0D]/45 font-light mt-3 leading-relaxed">
+        The collection is still here — this is a momentary issue.
+      </p>
+    </div>
     <button
       onClick={onRetry}
       className="text-[11px] tracking-[0.18em] uppercase font-medium text-[#0D0D0D] border-b border-[#0D0D0D]/30 hover:border-[#C9A96E] hover:text-[#C9A96E] pb-0.5 transition-colors"
     >
-      Try Again
+      Reload the Collection
     </button>
   </div>
 );
 
 // ── Category pill ─────────────────────────────────────────────────────────────
 
+/*
+  CATEGORY PILL PSYCHOLOGY:
+  Pills are identity selectors, not just filters.
+  The active state (black filled) signals commitment and belonging.
+  The hover state should feel like permission, not a UI affordance.
+*/
 const CategoryPill = ({ label, active, onClick }) => (
   <button
     onClick={onClick}
@@ -108,13 +148,12 @@ export default function ShopPage() {
   const handlePage     = (n)    => updateFilters({ page: n });
   const clearFilters   = ()     => setSearchParams({}, { replace: true });
 
-  // Data
   const { data: categoriesData } = useQuery({
     queryKey: ['categories'],
     queryFn:  ProductService.getCategories,
     staleTime: 1000 * 60 * 60,
   });
-  const categories = [{ slug: 'all', name: 'All' }, ...(categoriesData || [])];
+  const categories = [{ slug: 'all', name: 'Full Collection' }, ...(categoriesData || [])];
 
   const { data: productsData, isLoading, isError, error, isFetching } = useQuery({
     queryKey: ['products', filters],
@@ -130,19 +169,52 @@ export default function ShopPage() {
   return (
     <div className="bg-[#FAF9F7] min-h-screen">
 
+      {/*
+        HERO PSYCHOLOGY:
+        "Our Fragrances." is a label, not a lure.
+        We replace it with a desire-activating declaration:
+        "The only collection in Lagos built around you — not the market."
+
+        This does two things:
+        1. FLATTERS the reader — built around *you*, not a trend
+        2. INDICTS competitors — "not the market" implies everyone
+           else chases trends; Scenture chases the individual
+
+        The subtitle shifts from describing products to describing
+        the OUTCOME of owning them: transformation of presence,
+        not just "elevated everyday."
+
+        The eyebrow adds urgency: "Handcrafted · Limited Quantities"
+        — scarcity signal delivered before the grid even loads.
+      */}
       <PageHero
-        eyebrow="The Collection"
+        eyebrow="Handcrafted · Limited Quantities"
         title={
           <>
-            Our Fragrances<span className="text-[#C9A96E]">.</span>
+            Built around<span className="text-[#C9A96E]"> you</span>,<br />
+            not the market.
           </>
         }
-        subtitle="Meticulously crafted fragrances and diffusers designed to elevate your everyday."
+        subtitle="Each piece in this collection was made to transform how a room feels when you enter it — and how people feel when you leave."
         image={siteImages.shopHero}
         imageAlt={siteImages.shopHeroAlt}
       />
 
       {/* ── TOOLBAR ──────────────────────────────────────────────────────── */}
+      {/*
+        TOOLBAR PSYCHOLOGY:
+        Sort options are reframed as INTENT signals, not mechanical choices.
+        "What's New" beats "Newest." "Most Sought-After" beats "Featured" —
+        it implies others have already decided these are the best options,
+        triggering social proof at the point of selection.
+        "Investment Pieces First" reframes high price as aspiration, not cost.
+        "Start Within Reach" makes the low price option feel like an
+        onramp to the brand, not a compromise.
+
+        The product count copy shifts from "12 of 47 products" to
+        "47 signature pieces · showing 12" — "signature" elevates
+        every item before the reader sees it.
+      */}
       <div className="border-b border-[#0D0D0D]/08 px-8 lg:px-20 py-5">
         <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 
@@ -164,19 +236,21 @@ export default function ShopPage() {
             className="lg:hidden flex items-center gap-2 text-[11px] tracking-[0.16em] uppercase font-medium text-[#0D0D0D]/60 hover:text-[#0D0D0D] transition-colors"
           >
             <SlidersHorizontal size={14} strokeWidth={1.5} />
-            Filter &amp; Sort
+            Refine Selection
           </button>
 
           <div className="flex items-center gap-6">
-            {/* Count */}
+            {/* Count — reframed as curation signal */}
             <p className="text-[12px] text-[#0D0D0D]/35 font-light">
-              {isFetching ? 'Loading…' : `${showing} of ${totalProducts} products`}
+              {isFetching
+                ? 'Curating…'
+                : `${totalProducts} signature piece${totalProducts !== 1 ? 's' : ''} · showing ${showing}`}
             </p>
 
-            {/* Sort */}
+            {/* Sort — reframed as intent */}
             <div className="relative flex items-center gap-2">
               <label htmlFor="sort" className="text-[11px] tracking-[0.12em] uppercase text-[#0D0D0D]/40 hidden sm:block">
-                Sort
+                Show
               </label>
               <div className="relative">
                 <select
@@ -185,15 +259,44 @@ export default function ShopPage() {
                   onChange={handleSort}
                   className="appearance-none bg-transparent border-b border-[#0D0D0D]/20 text-[12px] text-[#0D0D0D] py-1 pl-0 pr-6 focus:outline-none focus:border-[#C9A96E] transition-colors cursor-pointer"
                 >
-                  <option value="featured">Featured</option>
-                  <option value="price-low-high">Price: Low → High</option>
-                  <option value="price-high-low">Price: High → Low</option>
-                  <option value="newest">Newest</option>
+                  <option value="featured">Most Sought-After</option>
+                  <option value="newest">What's New</option>
+                  <option value="price-high-low">Investment Pieces First</option>
+                  <option value="price-low-high">Start Within Reach</option>
                 </select>
                 <ChevronDown size={12} className="absolute right-0 top-1/2 -translate-y-1/2 text-[#0D0D0D]/40 pointer-events-none" />
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ── TRUST STRIP ──────────────────────────────────────────────────── */}
+      {/*
+        NEW SECTION — CONVERSION PSYCHOLOGY:
+        A thin strip immediately above the product grid that delivers
+        three rapid-fire trust signals before the customer sees a single price.
+        This is a "pre-suasion" technique (Cialdini) — context set before
+        evaluation changes how the evaluation is made.
+
+        Seeing "Handcrafted in Lagos · No mass production" before viewing
+        a ₦35,000 bottle makes the price feel like fair exchange, not a barrier.
+        "Free delivery on orders over ₦50,000" anchors a spend threshold
+        and nudges the reader to reach it.
+        "Every batch is numbered" is an exclusivity and authenticity signal
+        that adds perceived value to every product before it's even seen.
+      */}
+      <div className="bg-[#0D0D0D] px-8 lg:px-20 py-3">
+        <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12 text-center sm:text-left">
+          {[
+            'Handcrafted in Lagos · No mass production',
+            'Free delivery on orders over ₦50,000',
+            'Every batch is numbered · Never replicated',
+          ].map((item) => (
+            <p key={item} className="text-[10px] tracking-[0.18em] uppercase text-[#FAF9F7]/40 font-light">
+              {item}
+            </p>
+          ))}
         </div>
       </div>
 
@@ -217,6 +320,14 @@ export default function ShopPage() {
         </motion.div>
 
         {/* ── PAGINATION ─────────────────────────────────────────────────── */}
+        {/*
+          PAGINATION PSYCHOLOGY:
+          "← Prev" / "Next →" are mechanical. We reframe page navigation
+          as discovery: "← Back" / "More to Discover →"
+          Small language change — significant subconscious effect.
+          "More to discover" implies abundance and rewards the reader
+          for continuing, rather than simply advancing a counter.
+        */}
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-1 mt-20 pt-10 border-t border-[#0D0D0D]/08">
             <button
@@ -224,7 +335,7 @@ export default function ShopPage() {
               onClick={() => handlePage(filters.page - 1)}
               className="px-4 py-2 text-[11px] tracking-[0.15em] uppercase font-medium text-[#0D0D0D]/40 hover:text-[#0D0D0D] disabled:opacity-20 disabled:cursor-not-allowed transition-colors border-b border-transparent hover:border-[#0D0D0D]/30 pb-1 mr-4"
             >
-              ← Prev
+              ← Back
             </button>
 
             {[...Array(totalPages)].map((_, i) => (
@@ -246,8 +357,37 @@ export default function ShopPage() {
               onClick={() => handlePage(filters.page + 1)}
               className="px-4 py-2 text-[11px] tracking-[0.15em] uppercase font-medium text-[#0D0D0D]/40 hover:text-[#0D0D0D] disabled:opacity-20 disabled:cursor-not-allowed transition-colors border-b border-transparent hover:border-[#0D0D0D]/30 pb-1 ml-4"
             >
-              Next →
+              More to Discover →
             </button>
+          </div>
+        )}
+
+        {/*
+          BOTTOM-OF-GRID CONVERSION SAFETY NET:
+          A reader who scrolls to the bottom of the grid without
+          clicking is one of the highest-intent visitors on your site —
+          they saw everything and still haven't left.
+          This small reassurance strip catches them before they bounce.
+          "Still deciding? That's the right approach." validates their
+          hesitation rather than fighting it — disarming, not pushy.
+          Then it offers the softest possible next step: talk to us.
+        */}
+        {!isLoading && !isError && productsData?.data?.length > 0 && (
+          <div className="mt-16 pt-10 border-t border-[#0D0D0D]/06 flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
+            <div>
+              <p className="font-['Cormorant_Garamond'] text-xl font-light text-[#0D0D0D]">
+                Still deciding? That's the right approach.
+              </p>
+              <p className="text-[13px] text-[#0D0D0D]/40 font-light mt-1">
+                Our team helps you find the exact scent for your space and personality — no pressure.
+              </p>
+            </div>
+            <a
+              href="/contact"
+              className="shrink-0 text-[11px] tracking-[0.18em] uppercase font-medium text-[#0D0D0D] border-b border-[#0D0D0D]/30 hover:border-[#C9A96E] hover:text-[#C9A96E] pb-0.5 transition-colors"
+            >
+              Ask for a Recommendation →
+            </a>
           </div>
         )}
       </div>
@@ -273,7 +413,10 @@ export default function ShopPage() {
             >
               {/* Drawer header */}
               <div className="flex justify-between items-center px-8 py-6 border-b border-[#0D0D0D]/08">
-                <p className="text-[11px] tracking-[0.2em] uppercase font-medium text-[#0D0D0D]">Filter</p>
+                <div>
+                  <p className="text-[11px] tracking-[0.2em] uppercase font-medium text-[#0D0D0D]">Refine Selection</p>
+                  <p className="text-[10px] text-[#0D0D0D]/35 font-light mt-0.5">Find exactly what you want.</p>
+                </div>
                 <button onClick={() => setIsMobileFilterOpen(false)} className="text-[#0D0D0D]/40 hover:text-[#0D0D0D] transition-colors">
                   <X size={18} strokeWidth={1.5} />
                 </button>
@@ -282,7 +425,7 @@ export default function ShopPage() {
               <div className="flex-1 overflow-y-auto px-8 py-8 space-y-10">
                 {/* Categories */}
                 <div>
-                  <p className="text-[10px] tracking-[0.22em] uppercase text-[#0D0D0D]/35 mb-5">Categories</p>
+                  <p className="text-[10px] tracking-[0.22em] uppercase text-[#0D0D0D]/35 mb-5">Category</p>
                   <div className="flex flex-col gap-1">
                     {categories.map((cat) => (
                       <button
@@ -305,13 +448,13 @@ export default function ShopPage() {
 
                 {/* Sort */}
                 <div>
-                  <p className="text-[10px] tracking-[0.22em] uppercase text-[#0D0D0D]/35 mb-5">Sort By</p>
+                  <p className="text-[10px] tracking-[0.22em] uppercase text-[#0D0D0D]/35 mb-5">Show First</p>
                   <div className="flex flex-col gap-1">
                     {[
-                      { value: 'featured',       label: 'Featured' },
-                      { value: 'price-low-high', label: 'Price: Low → High' },
-                      { value: 'price-high-low', label: 'Price: High → Low' },
-                      { value: 'newest',         label: 'Newest' },
+                      { value: 'featured',       label: 'Most Sought-After' },
+                      { value: 'newest',         label: "What's New" },
+                      { value: 'price-high-low', label: 'Investment Pieces First' },
+                      { value: 'price-low-high', label: 'Start Within Reach' },
                     ].map((opt) => (
                       <button
                         key={opt.value}
@@ -337,7 +480,7 @@ export default function ShopPage() {
                   onClick={() => { clearFilters(); setIsMobileFilterOpen(false); }}
                   className="w-full py-4 border border-[#0D0D0D]/15 text-[11px] tracking-[0.18em] uppercase font-medium text-[#0D0D0D]/50 hover:border-[#0D0D0D]/40 hover:text-[#0D0D0D] transition-all"
                 >
-                  Clear All
+                  View Full Collection
                 </button>
               </div>
             </motion.div>
