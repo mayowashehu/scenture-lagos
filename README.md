@@ -1,7 +1,5 @@
 # Scenture Lagos
 
-![Banner placeholder](./docs/banner-placeholder.png)
-
 ## Overview
 
 Scenture Lagos is a premium fragrance e-commerce web application built with React and Vite. It's the digital storefront for a Lagos-based fragrance brand, combining editorial-style brand storytelling with a full online shopping experience — cart, checkout, and account management — alongside an admin panel for running the store.
@@ -56,11 +54,6 @@ The application is a client-rendered React SPA with a clear split between the pu
 - Lucide icons
 - React Helmet (page metadata)
 
-## Screenshots
-
-![Screenshot placeholder — landing page](./docs/screenshot-home-placeholder.png)
-![Screenshot placeholder — shop page](./docs/screenshot-shop-placeholder.png)
-![Screenshot placeholder — admin dashboard](./docs/screenshot-admin-placeholder.png)
 
 ## Live Demo
 
