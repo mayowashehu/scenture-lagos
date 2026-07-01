@@ -1,108 +1,127 @@
 # Scenture Lagos
 
-Scenture Lagos is a premium fragrance e-commerce web application built with React and Vite. It presents a luxury brand experience for a modern fragrance house in Lagos, combining storytelling, editorial-style design, and full online shopping functionality.
+![Banner placeholder](./docs/banner-placeholder.png)
 
-## What this project is about
+## Overview
 
-This project is more than a typical store. It is a polished digital storefront for a high-end fragrance brand that wants to feel exclusive, elegant, and intentional. The experience is designed to:
+Scenture Lagos is a premium fragrance e-commerce web application built with React and Vite. It's the digital storefront for a Lagos-based fragrance brand, combining editorial-style brand storytelling with a full online shopping experience — cart, checkout, and account management — alongside an admin panel for running the store.
 
-- showcase a curated collection of luxury fragrance products
-- guide visitors through the brand story and values
-- support browsing, filtering, and product discovery
-- allow customers to add items to cart and complete checkout
-- provide an admin experience for managing products, orders, customers, and inventory
+## Business Problem
 
-In short, the app blends e-commerce, brand storytelling, and store administration in one experience.
+A luxury fragrance brand needs an online presence that does more than list products. It needs to communicate exclusivity and brand identity while still functioning as a reliable store: browsing, filtering, checkout, and order management all need to work, without the site feeling like a generic e-commerce template.
 
-## Core features
+## Solution
 
-### Customer-facing storefront
-- elegant landing page with hero section and brand messaging
-- about page explaining the brand identity and mission
-- shop page with category-based browsing and sorting
-- product detail pages with rich product presentation
-- cart and checkout flow with shipping and payment steps
-- account access for customers, including authentication and protected routes
+Scenture Lagos is built as a brand-first storefront: an elegant landing experience and brand story pages sit alongside a fully functional shop, cart, and checkout flow. On the operations side, an admin dashboard gives the business owner control over products, categories, orders, customers, and inventory without needing to touch code.
 
-### Admin experience
-- protected admin dashboard with sales and store overview
-- product management for creating, editing, and viewing catalog items
-- category management for organizing the product catalog
-- order tracking and customer management
-- inventory history and store settings pages
+## Features
 
-### Technical highlights
-- responsive UI with Tailwind CSS
-- smooth motion and animation with Framer Motion
-- client-side state management with React Query and context providers
-- role-based access control for customer and admin routes
-- mock-data fallback support so the experience can still run without a live backend
+**Customer-facing storefront**
+- Landing page with hero section and brand messaging
+- About page communicating brand identity and mission
+- Shop page with category browsing and sorting
+- Product detail pages with rich product presentation
+- Cart and checkout flow with shipping and payment steps
+- Customer account access with authentication and protected routes
 
-## Tech stack
+**Admin experience**
+- Protected admin dashboard with sales and store overview
+- Product management (create, edit, view catalog items)
+- Category management
+- Order tracking and customer management
+- Inventory history and store settings
+
+**Technical highlights**
+- Responsive UI with Tailwind CSS and Framer Motion animations
+- Client-side state management via React Query and context providers
+- Role-based access control for customer vs. admin routes
+- Mock-data fallback support, so the frontend can be demoed or developed without a live backend connected
+
+**Note on completeness:** the checkout, order, and admin flows are built against an API contract defined in `src/services`. When `VITE_USE_MOCK_DATA` is enabled, the app runs on local mock data rather than a live backend — this is useful for demos but isn't the production data path.
+
+## Architecture Overview
+
+The application is a client-rendered React SPA with a clear split between the public storefront and the admin panel, each with its own layout and route guards. Data fetching and caching go through React Query, with API calls centralized in `src/services` (products, auth, cart, orders, admin). Auth and cart state are handled via React Context providers in `src/contexts`. When a live backend isn't available or `VITE_USE_MOCK_DATA=true` is set, the same service layer falls back to local mock data so the UI remains fully browsable.
+
+## Tech Stack
 
 - React 18
 - Vite
 - React Router DOM
 - Tailwind CSS
 - Framer Motion
-- React Query
+- TanStack (React) Query
 - Axios
 - React Hook Form + Zod
 - Lucide icons
-- Helmet for page metadata
+- React Helmet (page metadata)
 
-## Project structure
+## Screenshots
 
-- src/pages: main application pages such as home, shop, about, cart, checkout, account, and admin pages
-- src/components: reusable UI components, shared layout components, and admin-specific sections
-- src/contexts: authentication, cart, and refresh-related state providers
-- src/services: API services for products, auth, cart, orders, and admin operations
-- src/lib: utilities, mock data, site images, location data, and helper functions
-- scripts: small automation scripts for content or page patching tasks
+![Screenshot placeholder — landing page](./docs/screenshot-home-placeholder.png)
+![Screenshot placeholder — shop page](./docs/screenshot-shop-placeholder.png)
+![Screenshot placeholder — admin dashboard](./docs/screenshot-admin-placeholder.png)
 
-## Getting started
+## Live Demo
 
-### 1. Install dependencies
+https://scenturelagos.com.ng
+
+## Repository
+
+https://github.com/mayowashehu/scenture-lagos
+
+## Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/mayowashehu/scenture-lagos.git
+cd scenture-lagos
+
+# Install dependencies
 npm install
-```
 
-### 2. Configure environment variables
-
-Create a .env file in the project root with values similar to:
-
-```env
+# Configure environment variables
+# Create a .env file with:
 VITE_LOCAL_BASE_URL=http://localhost:5000/api
 VITE_BASE_URL=http://localhost:5000/api
 VITE_USE_MOCK_DATA=true
-```
 
-If you are connecting to a backend, update the API URLs accordingly. If mock data is enabled, the app can use local sample content for products and categories.
-
-### 3. Run the app locally
-
-```bash
+# Run the app locally
 npm run dev
-```
 
-The app should be available in your browser at the local Vite URL.
-
-## Available scripts
-
-```bash
-npm run dev
+# Build for production
 npm run build
+
+# Preview the production build
 npm run preview
+
+# Lint the codebase
 npm run lint
 ```
 
-## Notes
+## Project Structure
 
-The codebase is structured as a modern React storefront with a clear separation between public and admin experiences. The UI is heavily customized and brand-driven, so it is designed to feel more like a luxury product website than a generic e-commerce template.
+```
+src/
+├── pages/        # Home, shop, about, cart, checkout, account, admin pages
+├── components/    # Reusable UI, shared layout, admin-specific sections
+├── contexts/      # Auth, cart, and refresh-related state providers
+├── services/      # API services — products, auth, cart, orders, admin
+└── lib/           # Utilities, mock data, images, location data
+scripts/           # Automation scripts for content/page patching
+```
 
-If you want to evolve this project further, the most natural next steps are:
-- connect the frontend to a real backend API for full production data
-- expand admin analytics and reporting
-- add order history and customer account improvements
-- improve SEO and content management for product pages
+## Future Improvements
+
+- Connect the frontend to a production backend API for live order and inventory data
+- Expand admin analytics and reporting
+- Add order history and customer account improvements
+- Improve SEO and content management for product pages
+
+## License
+
+This project is currently unlicensed. All rights reserved unless a license is added.
+
+## Contribution
+
+This is a client project and not currently open for external contributions. Feel free to open an issue if you spot a bug or have a suggestion.
