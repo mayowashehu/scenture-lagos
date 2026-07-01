@@ -32,7 +32,7 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
 };
 
-// ── Data ────────────────────────────────────────────────────────────────────
+// ── Data behind thebehind the
 
 /*
   VALUES PSYCHOLOGY:
@@ -280,7 +280,7 @@ const AboutPage = () => {
                   we are simply naming it for them. Named feelings create trust.
                 */}
                 <p>
-                  In 2018, Adebola Adeyemi sat in a workshop in Victoria Island and asked a question
+                  In 2018, Oluwakemi Fatimah Shehu sat in a workshop in Victoria Island and asked a question
                   that had no satisfying answer: why does one of Africa's most sophisticated cities
                   have so few fragrance options worthy of the people who live here?
                 </p>
@@ -293,7 +293,7 @@ const AboutPage = () => {
                   not business.
                 */}
                 <p>
-                  He refused to wait for someone else to solve it. Starting with a single formula,
+                  She refused to wait for someone else to solve it. Starting with a single formula,
                   a standard that could not be diluted, and a belief that Lagos deserved
                   a fragrance house built in its own image — Scenture was born.
                 </p>
@@ -403,7 +403,7 @@ const AboutPage = () => {
 
         This technique is borrowed from long-form sales copy (the "bucket
         brigade" break) applied to editorial design.
-      */}
+      
       <section className="bg-[#0D0D0D] py-24 px-8 lg:px-20">
         <div className="max-w-[1440px] mx-auto">
           <motion.div
@@ -423,7 +423,7 @@ const AboutPage = () => {
           </motion.div>
         </div>
       </section>
-
+*/}
       {/* ── TEAM ──────────────────────────────────────────────────────────── */}
       {/*
         TEAM SECTION PSYCHOLOGY:
@@ -440,7 +440,7 @@ const AboutPage = () => {
         The hover micro-interaction (revealing a conviction statement)
         rewards curiosity with depth — small interactions that build
         emotional investment before the purchase.
-      */}
+      
       <section className="py-28 lg:py-36 px-8 lg:px-20">
         <div className="max-w-[1440px] mx-auto">
           <motion.div
@@ -473,7 +473,7 @@ const AboutPage = () => {
           </motion.div>
         </div>
       </section>
-
+*/}
       {/* ── CLOSING CTA ───────────────────────────────────────────────────── */}
       {/*
         CLOSING CTA PSYCHOLOGY:
